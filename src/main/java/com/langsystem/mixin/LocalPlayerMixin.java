@@ -11,7 +11,10 @@ import com.langsystem.util.RuneCipher;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.SignBlock;
+import net.minecraft.world.level.block.StandingSignBlock;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,8 +42,13 @@ public abstract class LocalPlayerMixin {
         ModDataComponents.LanguageText content = twoSided.side(isFrontText);
 
         if (content == null) {
+            BlockState state = signEntity.getBlockState();
+            var background = state.getBlock() instanceof SignBlock signBlock
+                    ? new LanguageSignEditScreen.VanillaBackground(SignBlock.getWoodType(signBlock), state.getBlock() instanceof StandingSignBlock)
+                    : null;
             Minecraft.getInstance().setScreen(new LanguageSignEditScreen(
-                    text -> PacketDistributor.sendToServer(new SaveVanillaSignPayload(pos, isFrontText, text))
+                    text -> PacketDistributor.sendToServer(new SaveVanillaSignPayload(pos, isFrontText, text)),
+                    background
             ));
             return;
         }

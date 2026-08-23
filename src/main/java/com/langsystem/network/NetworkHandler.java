@@ -6,12 +6,14 @@ import com.langsystem.data.LanguageData;
 import com.langsystem.data.ModAttachments;
 import com.langsystem.data.ModDataComponents;
 import com.langsystem.item.LanguageBookItem;
+import com.langsystem.util.RuneCipher;
 import com.langsystem.util.SpeechFluency;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignText;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -177,6 +179,23 @@ public final class NetworkHandler {
             ModDataComponents.LanguageText newSide =
                     new ModDataComponents.LanguageText(language.id(), payload.text(), progress);
             sign.setData(ModAttachments.VANILLA_SIGN_TEXT.get(), existingTwoSided.withSide(payload.isFrontText(), newSide));
+
+            // Настоящий (ванильный) SignText оставляем непустым — заполняем "фоновым"
+            // закодированным видом. Это не для чтения (наш рендер его перекрывает), а
+            // чтобы удовлетворить SignApplicator.canApplyToSign() -> SignText.hasMessage():
+            // без этого краситель/светящиеся чернила вообще не дают себя применить —
+            // ванильная проверка требует хотя бы одну непустую строку ДО применения.
+            String ambient = RuneCipher.produce(payload.text(), language, 0);
+            String[] ambientLines = ambient.split("\n", -1);
+            sign.updateText(oldText -> {
+                SignText updated = oldText;
+                for (int i = 0; i < 4; i++) {
+                    String line = i < ambientLines.length ? ambientLines[i] : "";
+                    updated = updated.setMessage(i, Component.literal(line));
+                }
+                return updated;
+            }, payload.isFrontText());
+
             sign.setChanged();
             serverPlayer.level().sendBlockUpdated(payload.pos(), sign.getBlockState(), sign.getBlockState(), 3);
         });

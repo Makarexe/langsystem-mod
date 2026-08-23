@@ -72,7 +72,9 @@ public abstract class SignRendererMixin {
             return;
         }
 
-        String ambient = RuneCipher.produce(content.rawText(), language, content.writerProgress());
+        // Прогресс 0 намеренно — фоновый вид всегда выглядит как чужая письменность,
+        // независимо от грамотности автора; расшифровка только через клик (LocalPlayerMixin).
+        String ambient = RuneCipher.produce(content.rawText(), language, 0);
         String[] lines = ambient.split("\n", -1);
 
         int darkColor = SignRenderer.getDarkColor(text);

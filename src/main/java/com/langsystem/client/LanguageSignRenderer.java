@@ -17,12 +17,12 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * Рисует сообщение прямо в мире, как у ванильной таблички — не нужно кликать, чтобы
- * что-то увидеть. Но в отличие от версии, где текст сразу подгонялся под наблюдателя,
- * здесь на весу всегда видно ОДИНАКОВЫЙ для всех "фоновый" вид — {@link RuneCipher#produce},
- * то есть с поправкой на грамотность ПИСАВШЕГО, но БЕЗ поправки на прогресс конкретного
- * читателя. Полная расшифровка "под себя" ({@link RuneCipher#read}) — только через клик
- * (см. {@link ClientSignScreens}). Лицевая и обратная стороны независимы — как у
- * настоящей вывески.
+ * что-то увидеть. На весу всегда видно ОДИНАКОВЫЙ для всех, полностью "непонятный" вид
+ * ({@link RuneCipher#produce} с прогрессом 0 — сплошные символы письменности языка),
+ * независимо от того, насколько хорошо владеет языком автор или наблюдатель. Полная
+ * расшифровка "под себя" ({@link RuneCipher#read}, учитывает ОБЕИХ — и грамотность
+ * написавшего, и знание читающего) — только через клик (см. {@link ClientSignScreens}).
+ * Лицевая и обратная стороны независимы — как у настоящей вывески.
  */
 public final class LanguageSignRenderer implements BlockEntityRenderer<LanguageSignBlockEntity> {
 
@@ -71,7 +71,9 @@ public final class LanguageSignRenderer implements BlockEntityRenderer<LanguageS
         if (language == null) {
             return;
         }
-        String ambient = RuneCipher.produce(content.rawText(), language, content.writerProgress());
+        // Прогресс 0 намеренно — фоновый вид всегда выглядит как чужая письменность,
+        // независимо от грамотности автора; расшифровка только через клик (см. RuneCipher#read).
+        String ambient = RuneCipher.produce(content.rawText(), language, 0);
         String[] lines = ambient.split("\n", -1);
 
         int maxPixelWidth = 1;
