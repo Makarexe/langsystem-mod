@@ -1,0 +1,13 @@
+{
+  "key.categories.langsystem": "Language System",
+  "key.langsystem.switch_language": "Open language menu",
+
+  "item.langsystem.human_tome": "Human Tome",
+  "item.langsystem.dwarven_tome": "Dwarven Tome",
+  "item.langsystem.elven_tome": "Elven Tome",
+  "item.langsystem.beastkin_tome": "Beastkin Tome",
+  "item.langsystem.draconic_tome": "Draconic Tome",
+  "item.langsystem.feyborn_tome": "Feyborn Tome",
+  "item.langsystem.hellborn_tome": "Hellborn Tome",
+  "item.langsystem.sign_tome": "Sign Language Tome"
+}

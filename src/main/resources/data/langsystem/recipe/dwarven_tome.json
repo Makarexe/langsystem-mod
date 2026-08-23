@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "minecraft:book" },
+    { "item": "minecraft:writable_book" },
+    { "item": "minecraft:iron_ingot" }
+  ],
+  "result": {
+    "id": "langsystem:dwarven_tome",
+    "count": 1
+  }
+}

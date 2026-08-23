@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.langsystem.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "LocalPlayerMixin",
+    "SignRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

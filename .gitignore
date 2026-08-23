@@ -1,0 +1,19 @@
+# Gradle
+.gradle/
+build/
+
+# NeoForge run directories
+run-client/
+run-server/
+
+# IDE
+.idea/
+*.iml
+out/
+
+# Claude Code local session state
+.claude/
+
+# OS
+Thumbs.db
+.DS_Store

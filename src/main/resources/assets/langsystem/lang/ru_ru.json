@@ -1,0 +1,13 @@
+{
+  "key.categories.langsystem": "Система языков",
+  "key.langsystem.switch_language": "Открыть меню языков",
+
+  "item.langsystem.human_tome": "Людской самоучитель",
+  "item.langsystem.dwarven_tome": "Дворфийский самоучитель",
+  "item.langsystem.elven_tome": "Эльфийский самоучитель",
+  "item.langsystem.beastkin_tome": "Зверолюдский самоучитель",
+  "item.langsystem.draconic_tome": "Драконий самоучитель",
+  "item.langsystem.feyborn_tome": "Самоучитель Феерождённых",
+  "item.langsystem.hellborn_tome": "Самоучитель Адорождённых",
+  "item.langsystem.sign_tome": "Самоучитель языка жестов"
+}

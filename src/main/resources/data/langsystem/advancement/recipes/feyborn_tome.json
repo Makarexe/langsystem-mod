@@ -1,0 +1,13 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": ["langsystem:feyborn_tome"]
+  },
+  "criteria": {
+    "has_tome_ingredient": {
+      "trigger": "minecraft:tick",
+      "conditions": {}
+    }
+  },
+  "requirements": [["has_tome_ingredient"]]
+}

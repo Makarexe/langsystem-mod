@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "langsystem:block/language_sign", "y": 180 },
+    "facing=south": { "model": "langsystem:block/language_sign" },
+    "facing=west": { "model": "langsystem:block/language_sign", "y": 270 },
+    "facing=east": { "model": "langsystem:block/language_sign", "y": 90 }
+  }
+}
