@@ -69,7 +69,7 @@ public final class LanguageSignEditScreen extends Screen {
     @Override
     protected void init() {
         addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> onDone())
-                .bounds(width / 2 - 100, height / 4 + 144, 200, 20).build());
+                .bounds(width / 2 - 100, (int) (signCenterY() + 90), 200, 20).build());
         field = new TextFieldHelper(
                 () -> messages[line],
                 s -> messages[line] = s,
@@ -107,10 +107,15 @@ public final class LanguageSignEditScreen extends Screen {
         return true;
     }
 
+    /** Вертикальный центр таблички/текста — чуть выше геометрического центра экрана. */
+    private float signCenterY() {
+        return height / 2f - 20f;
+    }
+
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
-        graphics.drawCenteredString(font, title, width / 2, 40, 0xFFFFFF);
+        graphics.drawCenteredString(font, title, width / 2, (int) (signCenterY() - 60), 0xFFFFFF);
 
         if (background != null && signModel != null) {
             Lighting.setupForFlatItems();
@@ -130,7 +135,7 @@ public final class LanguageSignEditScreen extends Screen {
 
     private void renderVanillaSign(GuiGraphics graphics) {
         graphics.pose().pushPose();
-        graphics.pose().translate((float) width / 2.0F, (float) height / 2.0F, 50.0F);
+        graphics.pose().translate((float) width / 2.0F, signCenterY(), 50.0F);
         if (!background.standing()) {
             graphics.pose().translate(0.0F, 35.0F, 0.0F);
         }
@@ -153,7 +158,7 @@ public final class LanguageSignEditScreen extends Screen {
     // --- свой блок (пока без 3D-фона — просто текст, как раньше) ---
 
     private void renderFlatLines(GuiGraphics graphics) {
-        renderLinesAt(graphics, width / 2, height / 2);
+        renderLinesAt(graphics, width / 2, (int) signCenterY());
     }
 
     /** Общий рендер 4 строк с курсором/выделением; (originX, originY) — точка, вокруг которой строки центрируются по вертикали. */
