@@ -2,8 +2,8 @@ package com.langsystem.mixin;
 
 import com.langsystem.Language;
 import com.langsystem.client.ClientLanguageState;
-import com.langsystem.client.LanguageBookReadScreen;
 import com.langsystem.client.LanguageSignEditScreen;
+import com.langsystem.client.LanguageSignReadScreen;
 import com.langsystem.data.ModAttachments;
 import com.langsystem.data.ModDataComponents;
 import com.langsystem.network.SaveVanillaSignPayload;
@@ -41,11 +41,12 @@ public abstract class LocalPlayerMixin {
         var twoSided = signEntity.getData(ModAttachments.VANILLA_SIGN_TEXT.get());
         ModDataComponents.LanguageText content = twoSided.side(isFrontText);
 
+        BlockState state = signEntity.getBlockState();
+        var background = state.getBlock() instanceof SignBlock signBlock
+                ? new LanguageSignEditScreen.VanillaBackground(SignBlock.getWoodType(signBlock), state.getBlock() instanceof StandingSignBlock)
+                : null;
+
         if (content == null) {
-            BlockState state = signEntity.getBlockState();
-            var background = state.getBlock() instanceof SignBlock signBlock
-                    ? new LanguageSignEditScreen.VanillaBackground(SignBlock.getWoodType(signBlock), state.getBlock() instanceof StandingSignBlock)
-                    : null;
             Minecraft.getInstance().setScreen(new LanguageSignEditScreen(
                     text -> PacketDistributor.sendToServer(new SaveVanillaSignPayload(pos, isFrontText, text)),
                     background
@@ -56,6 +57,6 @@ public abstract class LocalPlayerMixin {
         Language language = Language.byId(content.languageId()).orElse(Language.COMMON);
         int myProgress = ClientLanguageState.progressOf(language.id());
         String shown = RuneCipher.read(content.rawText(), language, content.writerProgress(), myProgress);
-        Minecraft.getInstance().setScreen(new LanguageBookReadScreen(language.displayName(), shown));
+        Minecraft.getInstance().setScreen(new LanguageSignReadScreen(language.displayName(), shown, background));
     }
 }

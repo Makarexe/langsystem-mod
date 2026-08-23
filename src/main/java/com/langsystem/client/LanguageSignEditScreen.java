@@ -130,7 +130,7 @@ public final class LanguageSignEditScreen extends Screen {
 
     private void renderVanillaSign(GuiGraphics graphics) {
         graphics.pose().pushPose();
-        graphics.pose().translate((float) width / 2.0F, 90.0F, 50.0F);
+        graphics.pose().translate((float) width / 2.0F, (float) height / 2.0F, 50.0F);
         if (!background.standing()) {
             graphics.pose().translate(0.0F, 35.0F, 0.0F);
         }

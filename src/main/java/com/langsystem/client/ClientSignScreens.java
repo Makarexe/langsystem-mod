@@ -11,8 +11,8 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 /**
  * Пустая сторона таблички -> экран записи ({@link LanguageSignEditScreen}, как у
- * ванильной таблички). Уже подписанная сторона -> экран чтения, персонально
- * посчитанный под текущего игрока — прямо в мире (см. {@link LanguageSignRenderer})
+ * ванильной таблички). Уже подписанная сторона -> экран чтения ({@link LanguageSignReadScreen}),
+ * персонально посчитанный под текущего игрока — прямо в мире (см. {@link LanguageSignRenderer})
  * всегда виден только "сырой" текст, без учёта прогресса читателя.
  */
 public final class ClientSignScreens {
@@ -28,7 +28,7 @@ public final class ClientSignScreens {
         Language language = Language.byId(content.languageId()).orElse(Language.COMMON);
         int myProgress = ClientLanguageState.progressOf(language.id());
         String shown = RuneCipher.read(content.rawText(), language, content.writerProgress(), myProgress);
-        Minecraft.getInstance().setScreen(new LanguageBookReadScreen(language.displayName(), shown));
+        Minecraft.getInstance().setScreen(new LanguageSignReadScreen(language.displayName(), shown));
     }
 
     private ClientSignScreens() {
