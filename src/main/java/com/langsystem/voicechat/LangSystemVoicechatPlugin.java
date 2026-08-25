@@ -68,7 +68,6 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
 
     private static final long CREATURE_SOUND_COOLDOWN_MS = 1500;
     private static final long DEBUG_MESSAGE_COOLDOWN_MS = 3000;
-    private static final String NON_ENTITY_KEY = "_non_entity";
 
     private final Map<UUID, Long> lastCreatureSoundAt = new ConcurrentHashMap<>();
     private final Map<String, Long> lastDebugMessageAt = new ConcurrentHashMap<>();
@@ -81,17 +80,16 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
 
     @Override
     public void registerEvents(EventRegistration registration) {
-        registration.registerEvent(ClientReceiveSoundEvent.class, this::onReceiveSound);
+        // Simple Voice Chat диспетчерит по ТОЧНОМУ классу через Map.get(Class), без
+        // instanceof — регистрация на базовый ClientReceiveSoundEvent.class никогда не
+        // совпадёт с реальными вызовами (они всегда идут на конкретные вложенные типы
+        // EntitySound/LocationalSound/StaticSound), обработчик просто никогда не вызовется,
+        // без единого исключения в логе. Подтверждено разбором байткода настоящего мода.
+        registration.registerEvent(ClientReceiveSoundEvent.EntitySound.class, this::onReceiveSound);
     }
 
-    private void onReceiveSound(ClientReceiveSoundEvent event) {
+    private void onReceiveSound(ClientReceiveSoundEvent.EntitySound entitySound) {
         boolean debug = VoiceDebugState.isEnabled();
-
-        if (!(event instanceof ClientReceiveSoundEvent.EntitySound entitySound)) {
-            logDebug(debug, NON_ENTITY_KEY, "получен звук не от игрока (" + event.getClass().getSimpleName()
-                    + ") — событие точно приходит, но это не голос рядом стоящего игрока");
-            return;
-        }
         LocalPlayer listener = Minecraft.getInstance().player;
         if (listener == null) {
             return;
@@ -111,7 +109,7 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
             return; // язык знаком свободно — без изменений
         }
 
-        short[] audio = event.getRawAudio();
+        short[] audio = entitySound.getRawAudio();
         if (audio.length == 0) {
             return; // пустой массив = конец потока, API просит его не трогать
         }
@@ -122,7 +120,7 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
         // Если для языка есть "звучание" существа — голос под ним почти не должен
         // быть слышен, иначе он мешает и смазывает эффект.
         float voiceVolume = creatureSounds != null ? 0.1f : 1f;
-        event.setRawAudio(muffle(audio, strength, voiceVolume));
+        entitySound.setRawAudio(muffle(audio, strength, voiceVolume));
 
         SoundEvent chosenSound = playCreatureSound ? creatureSounds.get(random.nextInt(creatureSounds.size())) : null;
         float pitch = 0.9f + random.nextFloat() * 0.2f;
