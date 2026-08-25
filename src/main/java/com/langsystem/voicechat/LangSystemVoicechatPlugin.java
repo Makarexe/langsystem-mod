@@ -63,10 +63,17 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
 
     static {
         CREATURE_SOUNDS.put(Language.HELLBORN, List.of(
-                SoundEvents.BLAZE_AMBIENT, SoundEvents.BLAZE_BURN, SoundEvents.GHAST_AMBIENT));
+                SoundEvents.BLAZE_AMBIENT, SoundEvents.BLAZE_BURN, SoundEvents.GHAST_AMBIENT,
+                SoundEvents.WITHER_AMBIENT, SoundEvents.WITHER_HURT));
     }
 
-    private static final long CREATURE_SOUND_COOLDOWN_MS = 1500;
+    /** Ниже этого прогресса голос вообще не слышен — только звуки существ. */
+    private static final int MUFFLED_ONLY_THRESHOLD = 40;
+    /** С этого прогресса звуки существ больше не играют — только (постепенно проясняющийся) голос. */
+    private static final int CLEAR_THRESHOLD = 80;
+
+    private static final long CREATURE_SOUND_COOLDOWN_MS = 350;
+    private static final float CREATURE_SOUND_VOLUME = 1.8f;
     private static final long DEBUG_MESSAGE_COOLDOWN_MS = 3000;
 
     private final Map<UUID, Long> lastCreatureSoundAt = new ConcurrentHashMap<>();
@@ -116,14 +123,38 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
 
         float strength = 1f - myProgress / 100f;
         List<SoundEvent> creatureSounds = CREATURE_SOUNDS.get(language);
-        boolean playCreatureSound = creatureSounds != null && isCreatureSoundDue(speakerId);
-        // Если для языка есть "звучание" существа — голос под ним почти не должен
-        // быть слышен, иначе он мешает и смазывает эффект.
-        float voiceVolume = creatureSounds != null ? 0.1f : 1f;
+
+        // Три полосы прогресса (только для языков со "звучанием" существа):
+        // < 40% — только звуки существ, голос полностью выключен;
+        // 40-80% — голос появляется (слегка приглушённый) и постепенно набирает силу,
+        //          звуки существ тем временем стихают, пока не пропадут совсем к 80%;
+        // >= 80% — звуков существ больше нет, голос доигрывает обычное приглушение
+        //          (strength), плавно проясняясь до 100%.
+        float creatureIntensity;
+        float voiceVolume;
+        if (creatureSounds == null) {
+            creatureIntensity = 0f;
+            voiceVolume = 1f;
+        } else if (myProgress < MUFFLED_ONLY_THRESHOLD) {
+            creatureIntensity = 1f;
+            voiceVolume = 0f;
+        } else if (myProgress < CLEAR_THRESHOLD) {
+            float t = (myProgress - MUFFLED_ONLY_THRESHOLD) / (float) (CLEAR_THRESHOLD - MUFFLED_ONLY_THRESHOLD);
+            creatureIntensity = 1f - t;
+            voiceVolume = 0.2f + 0.8f * t;
+        } else {
+            creatureIntensity = 0f;
+            voiceVolume = 1f;
+        }
+
+        boolean playCreatureSound = creatureIntensity > 0f && isCreatureSoundDue(speakerId)
+                && random.nextFloat() < creatureIntensity;
         entitySound.setRawAudio(muffle(audio, strength, voiceVolume));
 
         SoundEvent chosenSound = playCreatureSound ? creatureSounds.get(random.nextInt(creatureSounds.size())) : null;
-        float pitch = 0.9f + random.nextFloat() * 0.2f;
+        // Широкий разброс высоты тона — чтобы наложенные друг на друга звуки не сливались
+        // в один и тот же монотонный вопль, а звучали как несколько разных существ.
+        float pitch = 0.8f + random.nextFloat() * 0.5f;
         boolean shouldLog = debug && isDue(speakerId.toString());
 
         if (chosenSound == null && !shouldLog) {
@@ -137,7 +168,7 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
             }
             AbstractClientPlayer speaker = findPlayer(level, speakerId);
             if (chosenSound != null && speaker != null) {
-                level.playLocalSound(speaker, chosenSound, SoundSource.PLAYERS, 1.0f, pitch);
+                level.playLocalSound(speaker, chosenSound, SoundSource.PLAYERS, CREATURE_SOUND_VOLUME, pitch);
             }
             if (shouldLog) {
                 String name = speaker != null ? speaker.getGameProfile().getName() : shortId(speakerId);
