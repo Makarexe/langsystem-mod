@@ -3,6 +3,9 @@
   "minVersion": "0.8",
   "package": "com.langsystem.mixin",
   "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "SignBlockMixin"
+  ],
   "client": [
     "LocalPlayerMixin",
     "SignRendererMixin"

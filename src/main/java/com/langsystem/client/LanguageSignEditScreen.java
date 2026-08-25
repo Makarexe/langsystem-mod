@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.state.properties.WoodType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -45,10 +46,22 @@ public final class LanguageSignEditScreen extends Screen {
     private static final float SIGN_MODEL_SCALE = 62.500004F;
     private static final float TEXT_SCALE = 0.9765628F;
 
+    /** Породы с достаточно тёмной текстурой, чтобы чёрный текст на ней было не видно. */
+    private static final Set<String> DARK_WOODS = Set.of("spruce", "dark_oak", "mangrove", "crimson", "warped");
+
+    /** Цвет текста таблички: белый на тёмных породах, чёрный на светлых (как в ваниле); без фона — белый (тёмный прозрачный фон экрана). */
+    static int textColorFor(@Nullable WoodType wood) {
+        if (wood == null) {
+            return 0xFFFFFF;
+        }
+        return DARK_WOODS.contains(wood.name()) ? 0xFFFFFF : 0x000000;
+    }
+
     private final Consumer<String> onSave;
     @Nullable
     private final VanillaBackground background;
     private final String[] messages = new String[LINES];
+    private final int textColor;
     private int line;
     private int frame;
     private TextFieldHelper field;
@@ -63,6 +76,7 @@ public final class LanguageSignEditScreen extends Screen {
         super(Component.literal("Запись таблички"));
         this.onSave = onSave;
         this.background = background;
+        this.textColor = background != null ? textColorFor(background.woodType()) : 0xFFFFFF;
         Arrays.fill(messages, "");
     }
 
@@ -172,7 +186,7 @@ public final class LanguageSignEditScreen extends Screen {
             String s = messages[i];
             int x = originX - font.width(s) / 2;
             int y = originY + i * TEXT_LINE_HEIGHT - half;
-            graphics.drawString(font, s, x, y, 0xFFFFFF, false);
+            graphics.drawString(font, s, x, y, textColor, false);
 
             if (i != line) {
                 continue;
@@ -187,7 +201,7 @@ public final class LanguageSignEditScreen extends Screen {
             if (cursorVisible && cursorPos >= 0) {
                 int cx = x + font.width(s.substring(0, Math.max(Math.min(cursorPos, s.length()), 0)));
                 if (cursorPos >= s.length()) {
-                    graphics.drawString(font, "_", cx, y, 0xFFFFFF, false);
+                    graphics.drawString(font, "_", cx, y, textColor, false);
                 } else {
                     graphics.fill(cx, y - 1, cx + 1, y + font.lineHeight, 0xFFD0D0D0);
                 }

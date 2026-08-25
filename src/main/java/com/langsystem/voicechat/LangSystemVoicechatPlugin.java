@@ -32,10 +32,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * тем сильнее, чем ниже прогресс слушателя в этом языке. Свободное владение (100%) —
  * без изменений.
  *
- * <p>Для языков из {@link #CREATURE_SOUNDS} (пока только Адорождённых) вместо тонкого
- * DSP-фильтра дополнительно проигрывается настоящий ванильный звук существа рядом с
- * говорящим (для Адорождённых — блэйз/гаст, "звуки ифрита"), а сам голос почти
- * полностью приглушается — это гораздо заметнее на слух, чем один только фильтр.</p>
+ * <p>Для языков из {@link #CREATURE_SOUNDS} вместо тонкого DSP-фильтра дополнительно
+ * проигрывается настоящий ванильный звук существа рядом с говорящим (адорождённые —
+ * блэйз/визер, дворфийский — пиглины, эльфийский — эндермен, зверолюдский — волк,
+ * драконий — эндер-дракон, феерождённые — аллай), а сам голос почти полностью
+ * приглушается — это гораздо заметнее на слух, чем один только фильтр. У людского,
+ * всеобщего и языка жестов своего "звучания" нет — там только приглушение голоса.</p>
  *
  * <p>Событие {@code ClientReceiveSoundEvent} у Simple Voice Chat срабатывает на КАЖДОМ
  * слушающем клиенте отдельно, ещё до проигрывания звука — эффект можно сделать разным
@@ -63,8 +65,18 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
 
     static {
         CREATURE_SOUNDS.put(Language.HELLBORN, List.of(
-                SoundEvents.BLAZE_AMBIENT, SoundEvents.BLAZE_BURN, SoundEvents.GHAST_AMBIENT,
+                SoundEvents.BLAZE_AMBIENT, SoundEvents.BLAZE_BURN,
                 SoundEvents.WITHER_AMBIENT, SoundEvents.WITHER_HURT));
+        CREATURE_SOUNDS.put(Language.DWARVEN, List.of(
+                SoundEvents.PIGLIN_AMBIENT, SoundEvents.PIGLIN_ANGRY));
+        CREATURE_SOUNDS.put(Language.ELVEN, List.of(
+                SoundEvents.ENDERMAN_AMBIENT, SoundEvents.ENDERMAN_STARE));
+        CREATURE_SOUNDS.put(Language.BEASTKIN, List.of(
+                SoundEvents.WOLF_GROWL, SoundEvents.WOLF_WHINE, SoundEvents.WOLF_HOWL));
+        CREATURE_SOUNDS.put(Language.DRACONIC, List.of(
+                SoundEvents.ENDER_DRAGON_GROWL, SoundEvents.ENDER_DRAGON_AMBIENT));
+        CREATURE_SOUNDS.put(Language.FEYBORN, List.of(
+                SoundEvents.ALLAY_AMBIENT_WITHOUT_ITEM, SoundEvents.ALLAY_ITEM_GIVEN));
     }
 
     /** Ниже этого прогресса голос вообще не слышен — только звуки существ. */

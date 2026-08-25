@@ -29,6 +29,7 @@ public final class LanguageSignReadScreen extends Screen {
     @Nullable
     private final LanguageSignEditScreen.VanillaBackground background;
     private final String[] lines;
+    private final int textColor;
     @Nullable
     private SignRenderer.SignModel signModel;
 
@@ -40,6 +41,7 @@ public final class LanguageSignReadScreen extends Screen {
                                    @Nullable LanguageSignEditScreen.VanillaBackground background) {
         super(Component.literal(languageTitle));
         this.background = background;
+        this.textColor = background != null ? LanguageSignEditScreen.textColorFor(background.woodType()) : 0xFFFFFF;
         String[] split = bodyText.split("\n", -1);
         this.lines = new String[LINES];
         for (int i = 0; i < LINES; i++) {
@@ -112,7 +114,7 @@ public final class LanguageSignReadScreen extends Screen {
             String s = lines[i];
             int x = originX - font.width(s) / 2;
             int y = originY + i * TEXT_LINE_HEIGHT - half;
-            graphics.drawString(font, s, x, y, 0xFFFFFF, false);
+            graphics.drawString(font, s, x, y, textColor, false);
         }
     }
 
