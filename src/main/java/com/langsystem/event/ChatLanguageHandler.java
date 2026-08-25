@@ -2,6 +2,7 @@ package com.langsystem.event;
 
 import com.langsystem.LangSystemMod;
 import com.langsystem.Language;
+import com.langsystem.SpeechDefect;
 import com.langsystem.data.LanguageData;
 import com.langsystem.data.ModAttachments;
 import com.langsystem.util.RuneCipher;
@@ -14,6 +15,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.ServerChatEvent;
+
+import java.util.Random;
 
 @EventBusSubscriber(modid = LangSystemMod.MOD_ID)
 public final class ChatLanguageHandler {
@@ -46,6 +49,14 @@ public final class ChatLanguageHandler {
             return;
         }
 
+        // Дефекты речи (картавость и т.п.) искажают то, что говорящий физически
+        // произносит — те же самые буквы, одинаково для всех получателей, независимо от
+        // того, кто что понимает (в отличие от языкового шифра). Работает только здесь,
+        // в чате — не затрагивает то, что записывается в книги/таблички.
+        String spokenMessage = senderData.defects().isEmpty()
+                ? rawMessage
+                : SpeechDefect.applyAll(rawMessage, senderData.defects(), new Random());
+
         for (ServerPlayer recipient : server.getPlayerList().getPlayers()) {
             LanguageData recipientData = recipient.getData(ModAttachments.LANGUAGE_DATA);
             int understanding = recipient == sender ? 100 : recipientData.progress(spoken);
@@ -68,7 +79,7 @@ public final class ChatLanguageHandler {
                 // вообще, независимо от уровня владения языком.
                 bodyText = "* показывает жестами, но вы не видите говорящего *";
             } else {
-                bodyText = RuneCipher.read(rawMessage, spoken, senderProgress, understanding);
+                bodyText = RuneCipher.read(spokenMessage, spoken, senderProgress, understanding);
             }
 
             // Текст всегда белый, без цвета конкретного языка.

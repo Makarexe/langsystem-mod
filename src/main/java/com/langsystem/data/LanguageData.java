@@ -1,11 +1,15 @@
 package com.langsystem.data;
 
 import com.langsystem.Language;
+import com.langsystem.SpeechDefect;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -21,19 +25,23 @@ public final class LanguageData {
                     d.progress.entrySet().stream().collect(Collectors.toMap(e -> e.getKey().id(), Map.Entry::getValue))),
             Codec.STRING.fieldOf("current").forGetter(d -> d.current.id()),
             Codec.unboundedMap(Codec.STRING, Codec.LONG).fieldOf("studyCooldowns").forGetter(d ->
-                    d.lastStudyTick.entrySet().stream().collect(Collectors.toMap(e -> e.getKey().id(), Map.Entry::getValue)))
-    ).apply(instance, (progressMap, currentId, cooldownMap) -> {
+                    d.lastStudyTick.entrySet().stream().collect(Collectors.toMap(e -> e.getKey().id(), Map.Entry::getValue))),
+            Codec.STRING.listOf().optionalFieldOf("defects", List.of()).forGetter(d ->
+                    d.defects.stream().map(SpeechDefect::id).collect(Collectors.toList()))
+    ).apply(instance, (progressMap, currentId, cooldownMap, defectIds) -> {
         LanguageData data = new LanguageData();
         data.progress.clear();
         progressMap.forEach((id, percent) -> Language.byId(id).ifPresent(l -> data.progress.put(l, clamp(percent))));
         data.progress.putIfAbsent(Language.COMMON, 100);
         data.current = Language.byId(currentId).filter(data::knows).orElse(Language.COMMON);
         cooldownMap.forEach((id, tick) -> Language.byId(id).ifPresent(l -> data.lastStudyTick.put(l, tick)));
+        defectIds.forEach(id -> SpeechDefect.byId(id).ifPresent(data.defects::add));
         return data;
     }));
 
     private final Map<Language, Integer> progress = new EnumMap<>(Language.class);
     private final Map<Language, Long> lastStudyTick = new EnumMap<>(Language.class);
+    private final Set<SpeechDefect> defects = EnumSet.noneOf(SpeechDefect.class);
     private Language current = Language.COMMON;
 
     public LanguageData() {
@@ -102,11 +110,28 @@ public final class LanguageData {
         lastStudyTick.put(language, currentGameTime);
     }
 
+    public Set<SpeechDefect> defects() {
+        return defects;
+    }
+
+    public boolean hasDefect(SpeechDefect defect) {
+        return defects.contains(defect);
+    }
+
+    public boolean addDefect(SpeechDefect defect) {
+        return defects.add(defect);
+    }
+
+    public boolean removeDefect(SpeechDefect defect) {
+        return defects.remove(defect);
+    }
+
     public LanguageData copy() {
         LanguageData copy = new LanguageData();
         copy.progress.clear();
         copy.progress.putAll(this.progress);
         copy.lastStudyTick.putAll(this.lastStudyTick);
+        copy.defects.addAll(this.defects);
         copy.current = this.current;
         return copy;
     }

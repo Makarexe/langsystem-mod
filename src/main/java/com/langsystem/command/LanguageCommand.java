@@ -1,6 +1,7 @@
 package com.langsystem.command;
 
 import com.langsystem.Language;
+import com.langsystem.SpeechDefect;
 import com.langsystem.data.LanguageData;
 import com.langsystem.data.ModAttachments;
 import com.langsystem.network.NetworkHandler;
@@ -38,6 +39,20 @@ public final class LanguageCommand {
                 .then(Commands.literal("list")
                         .then(Commands.argument("player", EntityArgument.player())
                                 .executes(LanguageCommand::list)))
+                .then(Commands.literal("defect")
+                        .then(Commands.literal("give")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .then(Commands.argument("defect", StringArgumentType.word())
+                                                .suggests(LanguageCommand::suggestDefects)
+                                                .executes(ctx -> setDefect(ctx, true)))))
+                        .then(Commands.literal("take")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .then(Commands.argument("defect", StringArgumentType.word())
+                                                .suggests(LanguageCommand::suggestDefects)
+                                                .executes(ctx -> setDefect(ctx, false)))))
+                        .then(Commands.literal("list")
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(LanguageCommand::listDefects))))
         );
     }
 
@@ -90,6 +105,53 @@ public final class LanguageCommand {
                 .reduce((a, b) -> a + ", " + b).orElse("-");
         context.getSource().sendSuccess(() -> Component.literal(
                 target.getGameProfile().getName() + " знает: " + known + ". Сейчас говорит на: " + data.current().displayName()), false);
+        return 1;
+    }
+
+    private static java.util.concurrent.CompletableFuture<com.mojang.brigadier.suggestion.Suggestions> suggestDefects(
+            CommandContext<CommandSourceStack> context, com.mojang.brigadier.suggestion.SuggestionsBuilder builder) {
+        Arrays.stream(SpeechDefect.values()).map(SpeechDefect::id).forEach(builder::suggest);
+        return builder.buildFuture();
+    }
+
+    private static int setDefect(CommandContext<CommandSourceStack> context, boolean give) throws CommandSyntaxException {
+        ServerPlayer target = EntityArgument.getPlayer(context, "player");
+        String defectId = StringArgumentType.getString(context, "defect");
+        var opt = SpeechDefect.byId(defectId);
+        if (opt.isEmpty()) {
+            context.getSource().sendFailure(Component.literal("Неизвестный дефект речи: " + defectId));
+            return 0;
+        }
+        SpeechDefect defect = opt.get();
+        LanguageData data = target.getData(ModAttachments.LANGUAGE_DATA);
+        boolean changed = give ? data.addDefect(defect) : data.removeDefect(defect);
+        target.setData(ModAttachments.LANGUAGE_DATA, data);
+
+        if (!changed) {
+            context.getSource().sendFailure(Component.literal(
+                    give ? "У игрока уже есть этот дефект речи." : "У игрока и так нет такого дефекта речи."));
+            return 0;
+        }
+
+        if (give) {
+            context.getSource().sendSuccess(() -> Component.literal(
+                    target.getGameProfile().getName() + " теперь говорит с дефектом: " + defect.displayName()), true);
+            target.sendSystemMessage(Component.literal("Вам выдан дефект речи: " + defect.displayName()));
+        } else {
+            context.getSource().sendSuccess(() -> Component.literal(
+                    target.getGameProfile().getName() + " больше не имеет дефекта: " + defect.displayName()), true);
+            target.sendSystemMessage(Component.literal("У вас забрали дефект речи: " + defect.displayName()));
+        }
+        return 1;
+    }
+
+    private static int listDefects(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        ServerPlayer target = EntityArgument.getPlayer(context, "player");
+        LanguageData data = target.getData(ModAttachments.LANGUAGE_DATA);
+        String known = data.defects().stream().map(SpeechDefect::displayName)
+                .reduce((a, b) -> a + ", " + b).orElse("нет");
+        context.getSource().sendSuccess(() -> Component.literal(
+                target.getGameProfile().getName() + " — дефекты речи: " + known), false);
         return 1;
     }
 
