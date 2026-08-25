@@ -44,9 +44,11 @@ import java.util.concurrent.ConcurrentHashMap;
  * (чистая арифметика) остаётся прямо в обработчике, а любое обращение к игровому миру
  * (проигрывание звука, сообщение в чат) откладывается через {@code Minecraft.execute}.</p>
  *
- * <p>Включить отладочные сообщения в чат — команда {@code /langvoicedebug}
- * ({@link VoiceDebugState}) — полезно, чтобы увидеть, что перехват вообще срабатывает,
- * раз сам эффект на слух проверить не получается без живого теста.</p>
+ * <p>Команда {@code /langvoicedebug} ({@link VoiceDebugState}) включает отладочные
+ * сообщения в чат — они пишутся НА КАЖДОМ шаге принятия решения (даже когда эффект не
+ * нужен), чтобы можно было отличить "перехват вообще не срабатывает" от "срабатывает,
+ * но эффект в этот раз не требуется" — иначе по факту "тишины в логе" нельзя понять,
+ * где именно остановилась логика.</p>
  *
  * <p>Этот класс — единственное место в моде, которое напрямую ссылается на классы API
  * Simple Voice Chat. Обращается к нему только сам Simple Voice Chat, сканируя мод на
@@ -65,10 +67,11 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
     }
 
     private static final long CREATURE_SOUND_COOLDOWN_MS = 1500;
-    private static final long DEBUG_MESSAGE_COOLDOWN_MS = 2000;
+    private static final long DEBUG_MESSAGE_COOLDOWN_MS = 3000;
+    private static final String NON_ENTITY_KEY = "_non_entity";
 
     private final Map<UUID, Long> lastCreatureSoundAt = new ConcurrentHashMap<>();
-    private final Map<UUID, Long> lastDebugMessageAt = new ConcurrentHashMap<>();
+    private final Map<String, Long> lastDebugMessageAt = new ConcurrentHashMap<>();
     private final Random random = new Random();
 
     @Override
@@ -82,8 +85,12 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
     }
 
     private void onReceiveSound(ClientReceiveSoundEvent event) {
+        boolean debug = VoiceDebugState.isEnabled();
+
         if (!(event instanceof ClientReceiveSoundEvent.EntitySound entitySound)) {
-            return; // не голос игрока рядом (позиционный/статичный звук) — не трогаем
+            logDebug(debug, NON_ENTITY_KEY, "получен звук не от игрока (" + event.getClass().getSimpleName()
+                    + ") — событие точно приходит, но это не голос рядом стоящего игрока");
+            return;
         }
         LocalPlayer listener = Minecraft.getInstance().player;
         if (listener == null) {
@@ -91,13 +98,16 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
         }
         UUID speakerId = entitySound.getEntityId();
         if (speakerId.equals(listener.getUUID())) {
-            return; // свой собственный голос не трогаем
+            return; // свой собственный голос не трогаем и не логируем — это ожидаемо на каждом пакете
         }
 
         String languageId = ClientLanguageState.speakerLanguageOf(speakerId);
         Language language = Language.byId(languageId).orElse(Language.COMMON);
         int myProgress = ClientLanguageState.progressOf(language.id());
+
         if (myProgress >= 100) {
+            logDebug(debug, speakerId.toString(), shortId(speakerId) + " говорит на \"" + language.displayName()
+                    + "\", у вас там 100% — эффект не нужен, голос идёт как есть");
             return; // язык знаком свободно — без изменений
         }
 
@@ -114,13 +124,13 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
         float voiceVolume = creatureSounds != null ? 0.1f : 1f;
         event.setRawAudio(muffle(audio, strength, voiceVolume));
 
-        boolean shouldLog = VoiceDebugState.isEnabled() && isDebugMessageDue(speakerId);
-        if (!playCreatureSound && !shouldLog) {
-            return;
-        }
-
         SoundEvent chosenSound = playCreatureSound ? creatureSounds.get(random.nextInt(creatureSounds.size())) : null;
         float pitch = 0.9f + random.nextFloat() * 0.2f;
+        boolean shouldLog = debug && isDue(speakerId.toString());
+
+        if (chosenSound == null && !shouldLog) {
+            return;
+        }
 
         Minecraft.getInstance().execute(() -> {
             ClientLevel level = Minecraft.getInstance().level;
@@ -132,13 +142,17 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
                 level.playLocalSound(speaker, chosenSound, SoundSource.PLAYERS, 1.0f, pitch);
             }
             if (shouldLog) {
-                String name = speaker != null ? speaker.getGameProfile().getName() : speakerId.toString().substring(0, 8);
+                String name = speaker != null ? speaker.getGameProfile().getName() : shortId(speakerId);
                 String message = "[LangSystem/voice] " + name + " -> \"" + language.displayName()
                         + "\", ваш прогресс " + myProgress + "%, сила эффекта " + Math.round(strength * 100) + "%"
                         + (chosenSound != null ? " — играю звук существа" : " — приглушаю голос");
                 listener.displayClientMessage(Component.literal(message), false);
             }
         });
+    }
+
+    private static String shortId(UUID id) {
+        return id.toString().substring(0, 8);
     }
 
     @Nullable
@@ -161,14 +175,26 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
         return true;
     }
 
-    private boolean isDebugMessageDue(UUID speakerId) {
+    private boolean isDue(String key) {
         long now = System.currentTimeMillis();
-        Long last = lastDebugMessageAt.get(speakerId);
+        Long last = lastDebugMessageAt.get(key);
         if (last != null && now - last < DEBUG_MESSAGE_COOLDOWN_MS) {
             return false;
         }
-        lastDebugMessageAt.put(speakerId, now);
+        lastDebugMessageAt.put(key, now);
         return true;
+    }
+
+    private void logDebug(boolean enabled, String throttleKey, String message) {
+        if (!enabled || !isDue(throttleKey)) {
+            return;
+        }
+        Minecraft.getInstance().execute(() -> {
+            LocalPlayer player = Minecraft.getInstance().player;
+            if (player != null) {
+                player.displayClientMessage(Component.literal("[LangSystem/voice] " + message), false);
+            }
+        });
     }
 
     /**
