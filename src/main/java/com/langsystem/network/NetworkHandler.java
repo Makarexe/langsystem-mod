@@ -116,7 +116,13 @@ public final class NetworkHandler {
                     new ModDataComponents.LanguageText(language.id(), payload.text(), progress));
             stack.set(DataComponents.LORE, new ItemLore(List.of(
                     Component.literal(language.displayName()).withStyle(style -> style.withColor(language.color())))));
-            stack.set(DataComponents.CUSTOM_NAME, Component.literal("Исписанная языковая книга"));
+            // ITEM_NAME, а не CUSTOM_NAME — у последнего ItemStack.getTooltipLines()
+            // безусловно добавляет курсив, как только компонент вообще присутствует
+            // (проверено по декомпилированным исходникам), и убрать его стилем самого
+            // компонента нельзя — стиль переопределяется уже после. ITEM_NAME меняет
+            // отображаемое имя точно так же, но под эту принудительную стилизацию не
+            // подпадает.
+            stack.set(DataComponents.ITEM_NAME, Component.literal("Исписанная бумага"));
             // Переключает модель предмета на language_book_written через overrides в
             // language_book.json (custom_model_data == 1) — та же "бумага", но с парой
             // тёмных пикселей, похожих на текст, вместо чистого листа.
