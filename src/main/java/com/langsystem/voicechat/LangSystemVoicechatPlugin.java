@@ -34,7 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Для языков из {@link #CREATURE_SOUNDS} вместо тонкого DSP-фильтра дополнительно
  * проигрывается настоящий ванильный звук существа рядом с говорящим (адорождённые —
- * блэйз, дворфийский — поборник/разбойник, эльфийский — лавоход, зверолюдский — смесь
+ * блэйз, дворфийский — поборник/разбойник, эльфийский — нюхлер/фантом, зверолюдский — смесь
  * из амбиента большинства обычных зверей, драконий — эндер-дракон, феерождённые —
  * аллай, людской — житель), а сам голос почти
  * полностью приглушается — это гораздо заметнее на слух, чем один только фильтр. У
@@ -72,7 +72,8 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
                 SoundEvents.VINDICATOR_AMBIENT, SoundEvents.VINDICATOR_CELEBRATE,
                 SoundEvents.PILLAGER_AMBIENT, SoundEvents.PILLAGER_CELEBRATE));
         CREATURE_SOUNDS.put(Language.ELVEN, List.of(
-                SoundEvents.STRIDER_AMBIENT, SoundEvents.STRIDER_HAPPY, SoundEvents.STRIDER_STEP_LAVA));
+                SoundEvents.SNIFFER_IDLE, SoundEvents.SNIFFER_SNIFFING, SoundEvents.SNIFFER_SCENTING,
+                SoundEvents.PHANTOM_AMBIENT, SoundEvents.PHANTOM_SWOOP));
         CREATURE_SOUNDS.put(Language.BEASTKIN, List.of(
                 SoundEvents.WOLF_GROWL, SoundEvents.WOLF_HOWL, SoundEvents.COW_AMBIENT,
                 SoundEvents.PIG_AMBIENT, SoundEvents.SHEEP_AMBIENT, SoundEvents.CHICKEN_AMBIENT,
