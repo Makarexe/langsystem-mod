@@ -34,8 +34,9 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Для языков из {@link #CREATURE_SOUNDS} вместо тонкого DSP-фильтра дополнительно
  * проигрывается настоящий ванильный звук существа рядом с говорящим (адорождённые —
- * блэйз, дворфийский — поборник/разбойник, эльфийский — лавоход, зверолюдский — волк,
- * драконий — эндер-дракон, феерождённые — аллай, людской — житель), а сам голос почти
+ * блэйз, дворфийский — поборник/разбойник, эльфийский — лавоход, зверолюдский — смесь
+ * из амбиента большинства обычных зверей, драконий — эндер-дракон, феерождённые —
+ * аллай, людской — житель), а сам голос почти
  * полностью приглушается — это гораздо заметнее на слух, чем один только фильтр. У
  * всеобщего своего "звучания" нет — там только приглушение голоса. Язык жестов — особый
  * случай: голоса у него не бывает в принципе, глушится полностью и безусловно.</p>
@@ -73,7 +74,14 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
         CREATURE_SOUNDS.put(Language.ELVEN, List.of(
                 SoundEvents.STRIDER_AMBIENT, SoundEvents.STRIDER_HAPPY, SoundEvents.STRIDER_STEP_LAVA));
         CREATURE_SOUNDS.put(Language.BEASTKIN, List.of(
-                SoundEvents.WOLF_GROWL, SoundEvents.WOLF_WHINE, SoundEvents.WOLF_HOWL));
+                SoundEvents.WOLF_GROWL, SoundEvents.WOLF_HOWL, SoundEvents.COW_AMBIENT,
+                SoundEvents.PIG_AMBIENT, SoundEvents.SHEEP_AMBIENT, SoundEvents.CHICKEN_AMBIENT,
+                SoundEvents.CAT_AMBIENT, SoundEvents.HORSE_AMBIENT, SoundEvents.RABBIT_AMBIENT,
+                SoundEvents.FOX_AMBIENT, SoundEvents.PANDA_AMBIENT, SoundEvents.LLAMA_AMBIENT,
+                SoundEvents.POLAR_BEAR_AMBIENT, SoundEvents.DONKEY_AMBIENT, SoundEvents.GOAT_AMBIENT,
+                SoundEvents.DOLPHIN_AMBIENT, SoundEvents.TURTLE_AMBIENT_LAND, SoundEvents.PARROT_AMBIENT,
+                SoundEvents.FROG_AMBIENT, SoundEvents.CAMEL_AMBIENT, SoundEvents.BAT_AMBIENT,
+                SoundEvents.OCELOT_AMBIENT, SoundEvents.SNIFFER_IDLE));
         CREATURE_SOUNDS.put(Language.DRACONIC, List.of(
                 SoundEvents.ENDER_DRAGON_GROWL, SoundEvents.ENDER_DRAGON_AMBIENT));
         CREATURE_SOUNDS.put(Language.FEYBORN, List.of(
