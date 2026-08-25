@@ -203,6 +203,15 @@ public final class NetworkHandler {
                 return updated;
             }, payload.isFrontText());
 
+            // Ванильный SignBlock.useWithoutItem() открывает openTextEdit только если
+            // otherPlayerIsEditingSign() ложно, а тот блокируется, пока playerWhoMayEdit не
+            // сброшен в null — обычно это делает сам ванильный обработчик пакета сохранения
+            // (SignBlockEntity:148-150), но мы пишем текст напрямую через updateText() в
+            // обход него, так что должны сами снять блокировку. Иначе, пока автор не отойдёт
+            // от таблички дальше 4 блоков (см. SignBlockEntity.tick/clearInvalidPlayerWhoMayEdit),
+            // ни один другой игрок вообще не может кликнуть по табличке, чтобы её прочитать.
+            sign.setAllowedPlayerEditor(null);
+
             sign.setChanged();
             serverPlayer.level().sendBlockUpdated(payload.pos(), sign.getBlockState(), sign.getBlockState(), 3);
         });
