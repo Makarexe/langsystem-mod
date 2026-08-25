@@ -1,28 +1,35 @@
 package com.langsystem.client;
 
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 /**
- * Простой построчный редактор текста (используется и книгой, и табличкой — источник
- * не важен, экран лишь собирает введённый текст и отдаёт его вызывающему коду).
- * Записывается текст на языке, который у игрока сейчас выбран как текущий (см. GUI
- * выбора языка) — здесь это не показывается отдельно, но само название экрана
- * подсказывает, что писать стоит на нём.
+ * Экран записи языковой книги — вместо голого списка текстовых полей рисует настоящий
+ * ванильный фон книги с пером ({@code textures/gui/book.png}), теми же числами
+ * позиционирования, что и у ванильного {@code BookEditScreen}/{@code BookViewScreen}
+ * (проверено по декомпилированным исходникам): фон 192x192 в {@code ((width-192)/2, 2)},
+ * текстовая колонка шириной 114 начинается на 36 правее и 30 ниже угла фона. Полей 8,
+ * каждое высотой 16 — ровно заполняют текстовую область (128 px) страницы.
  */
 public final class LanguageBookEditScreen extends Screen {
 
+    private static final ResourceLocation BOOK_TEXTURE = ResourceLocation.withDefaultNamespace("textures/gui/book.png");
+    private static final int IMAGE_WIDTH = 192;
+    private static final int IMAGE_HEIGHT = 192;
+    private static final int TEXT_WIDTH = 114;
+    private static final int PAGE_TEXT_X_OFFSET = 36;
+    private static final int PAGE_TEXT_Y_OFFSET = 30;
     private static final int LINES = 8;
-    private static final int FIELD_WIDTH = 300;
-    private static final int FIELD_HEIGHT = 16;
-    private static final int SPACING = 4;
+    private static final int LINE_HEIGHT = 16;
+    private static final int TEXT_COLOR = 0x000000;
 
     private final Consumer<String> onSave;
     private final List<EditBox> fields = new ArrayList<>();
@@ -32,30 +39,37 @@ public final class LanguageBookEditScreen extends Screen {
         this.onSave = onSave;
     }
 
+    private int backgroundX() {
+        return (width - IMAGE_WIDTH) / 2;
+    }
+
     @Override
     protected void init() {
         fields.clear();
-        int totalHeight = LINES * (FIELD_HEIGHT + SPACING) + 60;
-        int startY = Math.max(24, (height - totalHeight) / 2);
-        int x = (width - FIELD_WIDTH) / 2;
+        int x = backgroundX() + PAGE_TEXT_X_OFFSET;
+        int y = 2 + PAGE_TEXT_Y_OFFSET;
 
-        addRenderableWidget(new StringWidget(x, startY - 18, FIELD_WIDTH, 14, title, font).alignCenter());
-
-        int y = startY;
         for (int i = 0; i < LINES; i++) {
-            EditBox field = new EditBox(font, x, y, FIELD_WIDTH, FIELD_HEIGHT, Component.literal("Строка " + (i + 1)));
+            EditBox field = new EditBox(font, x, y + i * LINE_HEIGHT, TEXT_WIDTH, LINE_HEIGHT,
+                    Component.literal("Строка " + (i + 1)));
+            field.setBordered(false);
+            field.setTextColor(TEXT_COLOR);
             field.setMaxLength(200);
             addRenderableWidget(field);
             fields.add(field);
-            y += FIELD_HEIGHT + SPACING;
         }
+        setInitialFocus(fields.get(0));
 
-        int buttonY = y + 6;
-        int buttonWidth = (FIELD_WIDTH - SPACING) / 2;
         addRenderableWidget(Button.builder(Component.literal("Записать"), b -> save())
-                .bounds(x, buttonY, buttonWidth, 20).build());
+                .bounds(width / 2 - 100, 196, 98, 20).build());
         addRenderableWidget(Button.builder(Component.literal("Отмена"), b -> onClose())
-                .bounds(x + buttonWidth + SPACING, buttonY, buttonWidth, 20).build());
+                .bounds(width / 2 + 2, 196, 98, 20).build());
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
+        renderTransparentBackground(graphics);
+        graphics.blit(BOOK_TEXTURE, backgroundX(), 2, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
     }
 
     private void save() {

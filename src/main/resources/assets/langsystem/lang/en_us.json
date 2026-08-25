@@ -2,6 +2,9 @@
   "key.categories.langsystem": "Language System",
   "key.langsystem.switch_language": "Open language menu",
 
+  "itemGroup.langsystem.main": "Language System",
+
+  "item.langsystem.language_book": "Blank Language Book",
   "item.langsystem.human_tome": "Human Tome",
   "item.langsystem.dwarven_tome": "Dwarven Tome",
   "item.langsystem.elven_tome": "Elven Tome",

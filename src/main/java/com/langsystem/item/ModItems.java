@@ -2,8 +2,6 @@ package com.langsystem.item;
 
 import com.langsystem.LangSystemMod;
 import com.langsystem.Language;
-import com.langsystem.block.ModBlocks;
-import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.neoforged.neoforge.registries.DeferredItem;
 import net.neoforged.neoforge.registries.DeferredRegister;
@@ -33,9 +31,6 @@ public final class ModItems {
     /** Пустая книга, в которую можно записать текст на текущем языке (см. {@link LanguageBookItem}). */
     public static final DeferredItem<LanguageBookItem> LANGUAGE_BOOK = ITEMS.registerItem("language_book",
             LanguageBookItem::new, new Item.Properties().stacksTo(1));
-
-    public static final DeferredItem<BlockItem> LANGUAGE_SIGN_ITEM = ITEMS.registerItem("language_sign",
-            properties -> new BlockItem(ModBlocks.LANGUAGE_SIGN.get(), properties), new Item.Properties());
 
     public static DeferredItem<LanguageTomeItem> tomeFor(Language language) {
         return TOMES.get(language);

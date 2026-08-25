@@ -5,6 +5,7 @@ import com.langsystem.block.ModBlocks;
 import com.langsystem.command.LanguageCommand;
 import com.langsystem.data.ModAttachments;
 import com.langsystem.data.ModDataComponents;
+import com.langsystem.item.ModCreativeTabs;
 import com.langsystem.item.ModItems;
 import com.langsystem.network.NetworkHandler;
 import net.neoforged.bus.api.IEventBus;
@@ -29,6 +30,7 @@ public final class LangSystemMod {
         ModBlocks.BLOCKS.register(modEventBus);
         ModBlockEntities.BLOCK_ENTITY_TYPES.register(modEventBus);
         ModItems.ITEMS.register(modEventBus);
+        ModCreativeTabs.CREATIVE_MODE_TABS.register(modEventBus);
         modEventBus.addListener(NetworkHandler::register);
     }
 

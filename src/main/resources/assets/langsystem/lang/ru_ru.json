@@ -2,6 +2,9 @@
   "key.categories.langsystem": "Система языков",
   "key.langsystem.switch_language": "Открыть меню языков",
 
+  "itemGroup.langsystem.main": "Система языков",
+
+  "item.langsystem.language_book": "Чистая языковая книга",
   "item.langsystem.human_tome": "Людской самоучитель",
   "item.langsystem.dwarven_tome": "Дворфийский самоучитель",
   "item.langsystem.elven_tome": "Эльфийский самоучитель",

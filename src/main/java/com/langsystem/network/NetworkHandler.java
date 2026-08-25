@@ -1,7 +1,6 @@
 package com.langsystem.network;
 
 import com.langsystem.Language;
-import com.langsystem.block.LanguageSignBlockEntity;
 import com.langsystem.data.LanguageData;
 import com.langsystem.data.ModAttachments;
 import com.langsystem.data.ModDataComponents;
@@ -50,12 +49,6 @@ public final class NetworkHandler {
                 SaveLanguageBookPayload.TYPE,
                 SaveLanguageBookPayload.STREAM_CODEC,
                 NetworkHandler::handleSaveBook
-        );
-
-        registrar.playToServer(
-                SaveLanguageSignPayload.TYPE,
-                SaveLanguageSignPayload.STREAM_CODEC,
-                NetworkHandler::handleSaveSign
         );
 
         registrar.playToServer(
@@ -117,39 +110,6 @@ public final class NetworkHandler {
             }
 
             stack.set(ModDataComponents.LANGUAGE_BOOK_TEXT.get(),
-                    new ModDataComponents.LanguageText(language.id(), payload.text(), progress));
-        });
-    }
-
-    private static void handleSaveSign(SaveLanguageSignPayload payload, IPayloadContext context) {
-        context.enqueueWork(() -> {
-            if (!(context.player() instanceof ServerPlayer serverPlayer)) {
-                return;
-            }
-            if (serverPlayer.blockPosition().distSqr(payload.pos()) > 64.0 * 64.0) {
-                return; // слишком далеко — подозрительно, игнорируем
-            }
-            if (!(serverPlayer.level().getBlockEntity(payload.pos()) instanceof LanguageSignBlockEntity sign)) {
-                return;
-            }
-            if (sign.content(payload.isFrontText()) != null) {
-                return; // эта сторона уже подписана
-            }
-
-            LanguageData data = serverPlayer.getData(ModAttachments.LANGUAGE_DATA);
-            Language language = data.current();
-            int progress = data.progress(language);
-            if (progress < SpeechFluency.CANNOT_SPEAK_BELOW) {
-                serverPlayer.displayClientMessage(Component.literal(
-                                "[Языки] Вы знаете \"" + language.displayName()
-                                        + "\" слишком слабо, чтобы связно записать текст на нём (нужно минимум "
-                                        + SpeechFluency.CANNOT_SPEAK_BELOW + "%).")
-                                .withStyle(style -> style.withColor(0xFF5555)),
-                        true);
-                return;
-            }
-
-            sign.setContent(payload.isFrontText(),
                     new ModDataComponents.LanguageText(language.id(), payload.text(), progress));
         });
     }

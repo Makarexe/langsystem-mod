@@ -27,12 +27,12 @@ import java.util.function.Consumer;
  * ширина строки — 90 пикселей, как у настоящей ванильной таблички
  * ({@code SignBlockEntity.MAX_TEXT_LINE_WIDTH}).
  *
- * <p>Если передан {@link VanillaBackground} (перехваченная ванильная табличка, см.
- * {@code mixin.LocalPlayerMixin}) — позади текста рисуется НАСТОЯЩАЯ 3D-модель таблички
- * нужной породы дерева, теми же числами позиционирования, что и у ванильного
- * {@code SignEditScreen} (проверено по декомпилированным исходникам). Для своего блока
- * ({@code language_sign}) фон не передаётся — фона нет, только текст (свой блок пока не
- * имеет запечённой ModelPart-модели, которую можно было бы так же показать).</p>
+ * <p>Открывается только для перехваченных ванильных табличек (см.
+ * {@code mixin.LocalPlayerMixin}/{@code mixin.SignBlockMixin}), поэтому {@link VanillaBackground}
+ * передаётся всегда — позади текста рисуется НАСТОЯЩАЯ 3D-модель таблички нужной породы
+ * дерева, теми же числами позиционирования, что и у ванильного {@code SignEditScreen}
+ * (проверено по декомпилированным исходникам). Параметр остаётся nullable на случай
+ * будущего вызова без фона.</p>
  */
 public final class LanguageSignEditScreen extends Screen {
 
@@ -169,7 +169,7 @@ public final class LanguageSignEditScreen extends Screen {
         graphics.pose().popPose();
     }
 
-    // --- свой блок (пока без 3D-фона — просто текст, как раньше) ---
+    // --- без фона (сейчас не используется, background всегда передан — оставлено для надёжности) ---
 
     private void renderFlatLines(GuiGraphics graphics) {
         renderLinesAt(graphics, width / 2, (int) signCenterY());
