@@ -40,18 +40,23 @@ public final class LanguageBookReadScreen extends Screen {
         return (width - IMAGE_WIDTH) / 2;
     }
 
+    private int backgroundY() {
+        return (height - IMAGE_HEIGHT) / 2;
+    }
+
     @Override
     protected void init() {
         lines = font.split(FormattedText.of(bodyText), TEXT_WIDTH);
+        int buttonY = backgroundY() + IMAGE_HEIGHT + 2;
         addRenderableWidget(Button.builder(Component.literal("Закрыть"), b -> onClose())
-                .bounds(width / 2 - 100, 196, 200, 20).build());
+                .bounds(width / 2 - 100, buttonY, 200, 20).build());
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         super.render(graphics, mouseX, mouseY, partialTick);
         int x = backgroundX() + PAGE_TEXT_X_OFFSET;
-        int y = 2 + PAGE_TEXT_Y_OFFSET;
+        int y = backgroundY() + PAGE_TEXT_Y_OFFSET;
         int maxLines = Math.min(TEXT_HEIGHT / LINE_HEIGHT, lines.size());
         for (int i = 0; i < maxLines; i++) {
             graphics.drawString(font, lines.get(i), x, y + i * LINE_HEIGHT, TEXT_COLOR, false);
@@ -61,7 +66,7 @@ public final class LanguageBookReadScreen extends Screen {
     @Override
     public void renderBackground(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         renderTransparentBackground(graphics);
-        graphics.blit(BOOK_TEXTURE, backgroundX(), 2, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+        graphics.blit(BOOK_TEXTURE, backgroundX(), backgroundY(), 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
     }
 
     @Override

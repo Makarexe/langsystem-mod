@@ -7,10 +7,12 @@ import com.langsystem.data.ModDataComponents;
 import com.langsystem.item.LanguageBookItem;
 import com.langsystem.util.RuneCipher;
 import com.langsystem.util.SpeechFluency;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -111,6 +113,8 @@ public final class NetworkHandler {
 
             stack.set(ModDataComponents.LANGUAGE_BOOK_TEXT.get(),
                     new ModDataComponents.LanguageText(language.id(), payload.text(), progress));
+            stack.set(DataComponents.LORE, new ItemLore(List.of(
+                    Component.literal(language.displayName()).withStyle(style -> style.withColor(language.color())))));
         });
     }
 
