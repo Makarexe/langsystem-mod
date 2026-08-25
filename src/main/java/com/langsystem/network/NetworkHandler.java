@@ -12,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomModelData;
 import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
@@ -115,6 +116,11 @@ public final class NetworkHandler {
                     new ModDataComponents.LanguageText(language.id(), payload.text(), progress));
             stack.set(DataComponents.LORE, new ItemLore(List.of(
                     Component.literal(language.displayName()).withStyle(style -> style.withColor(language.color())))));
+            stack.set(DataComponents.CUSTOM_NAME, Component.literal("Исписанная языковая книга"));
+            // Переключает модель предмета на language_book_written через overrides в
+            // language_book.json (custom_model_data == 1) — та же "бумага", но с парой
+            // тёмных пикселей, похожих на текст, вместо чистого листа.
+            stack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(1));
         });
     }
 
