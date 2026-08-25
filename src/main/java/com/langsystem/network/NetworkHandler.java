@@ -40,6 +40,12 @@ public final class NetworkHandler {
                 ClientPacketHandler::handleSync
         );
 
+        registrar.playToClient(
+                SyncSpeakerLanguagePayload.TYPE,
+                SyncSpeakerLanguagePayload.STREAM_CODEC,
+                ClientPacketHandler::handleSyncSpeakerLanguage
+        );
+
         registrar.playToServer(
                 SaveLanguageBookPayload.TYPE,
                 SaveLanguageBookPayload.STREAM_CODEC,
@@ -79,6 +85,7 @@ public final class NetworkHandler {
                     true
             );
             sendSync(serverPlayer);
+            broadcastSpeakerLanguage(serverPlayer);
         });
     }
 
@@ -211,6 +218,25 @@ public final class NetworkHandler {
             percents.add(entry.getValue());
         }
         PacketDistributor.sendToPlayer(player, new SyncLanguagePayload(ids, percents, data.current().id()));
+    }
+
+    /** Разослать всем игрокам, на каком языке сейчас говорит этот игрок (для приглушения голоса). */
+    public static void broadcastSpeakerLanguage(ServerPlayer player) {
+        LanguageData data = player.getData(ModAttachments.LANGUAGE_DATA);
+        PacketDistributor.sendToAllPlayers(new SyncSpeakerLanguagePayload(player.getUUID(), data.current().id()));
+    }
+
+    /**
+     * Вызывать при входе игрока: сообщить ему текущий язык каждого из уже онлайн
+     * игроков и разослать всем остальным его собственный (иначе те, кто уже был в
+     * игре, не узнают о новом собеседнике, пока тот не сменит язык явно).
+     */
+    public static void sendAllSpeakerLanguages(ServerPlayer joiningPlayer) {
+        for (ServerPlayer other : joiningPlayer.server.getPlayerList().getPlayers()) {
+            LanguageData otherData = other.getData(ModAttachments.LANGUAGE_DATA);
+            PacketDistributor.sendToPlayer(joiningPlayer, new SyncSpeakerLanguagePayload(other.getUUID(), otherData.current().id()));
+        }
+        broadcastSpeakerLanguage(joiningPlayer);
     }
 
     private NetworkHandler() {

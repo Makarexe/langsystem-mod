@@ -9,6 +9,10 @@ public final class ClientPacketHandler {
         context.enqueueWork(() -> ClientLanguageState.update(payload.languageIds(), payload.progress(), payload.current()));
     }
 
+    public static void handleSyncSpeakerLanguage(SyncSpeakerLanguagePayload payload, IPayloadContext context) {
+        context.enqueueWork(() -> ClientLanguageState.updateSpeakerLanguage(payload.playerId(), payload.languageId()));
+    }
+
     private ClientPacketHandler() {
     }
 }

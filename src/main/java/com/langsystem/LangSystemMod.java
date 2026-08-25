@@ -44,6 +44,7 @@ public final class LangSystemMod {
         public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
             if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer serverPlayer) {
                 NetworkHandler.sendSync(serverPlayer);
+                NetworkHandler.sendAllSpeakerLanguages(serverPlayer);
             }
         }
 

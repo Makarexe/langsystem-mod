@@ -18,6 +18,9 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 repositories {
     mavenCentral()
     mavenLocal()
+    maven {
+        url = 'https://maven.maxhenkel.de/repository/public'
+    }
 }
 
 neoForge {
@@ -54,7 +57,9 @@ neoForge {
 }
 
 dependencies {
-    // никаких дополнительных зависимостей не требуется
+    // Simple Voice Chat API — опциональная интеграция (см. voicechat/LangSystemVoicechatPlugin.java).
+    // Мод собирается и работает без установленного Simple Voice Chat — просто эта функция молчит.
+    implementation "de.maxhenkel.voicechat:voicechat-api:${voicechat_api_version}"
 }
 
 tasks.named('processResources', ProcessResources).configure {

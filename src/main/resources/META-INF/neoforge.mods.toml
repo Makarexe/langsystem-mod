@@ -25,3 +25,13 @@ description = '''${mod_description}'''
     versionRange = "${minecraft_version_range}"
     ordering = "NONE"
     side = "BOTH"
+
+# Опционально: если у игрока стоит Simple Voice Chat, включаем приглушение голоса на
+# незнакомом языке (см. voicechat/LangSystemVoicechatPlugin.java). Без него мод работает
+# как обычно — просто без этой функции.
+[[dependencies."${mod_id}"]]
+    modId = "voicechat"
+    type = "optional"
+    versionRange = "[2.5.0,)"
+    ordering = "AFTER"
+    side = "BOTH"
