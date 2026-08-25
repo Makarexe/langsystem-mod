@@ -34,10 +34,11 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Для языков из {@link #CREATURE_SOUNDS} вместо тонкого DSP-фильтра дополнительно
  * проигрывается настоящий ванильный звук существа рядом с говорящим (адорождённые —
- * блэйз/визер, дворфийский — пиглины, эльфийский — эндермен, зверолюдский — волк,
- * драконий — эндер-дракон, феерождённые — аллай), а сам голос почти полностью
- * приглушается — это гораздо заметнее на слух, чем один только фильтр. У людского,
- * всеобщего и языка жестов своего "звучания" нет — там только приглушение голоса.</p>
+ * блэйз, дворфийский — поборник/разбойник, эльфийский — лавоход, зверолюдский — волк,
+ * драконий — эндер-дракон, феерождённые — аллай, людской — житель), а сам голос почти
+ * полностью приглушается — это гораздо заметнее на слух, чем один только фильтр. У
+ * всеобщего своего "звучания" нет — там только приглушение голоса. Язык жестов — особый
+ * случай: голоса у него не бывает в принципе, глушится полностью и безусловно.</p>
  *
  * <p>Событие {@code ClientReceiveSoundEvent} у Simple Voice Chat срабатывает на КАЖДОМ
  * слушающем клиенте отдельно, ещё до проигрывания звука — эффект можно сделать разным
@@ -65,18 +66,20 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
 
     static {
         CREATURE_SOUNDS.put(Language.HELLBORN, List.of(
-                SoundEvents.BLAZE_AMBIENT, SoundEvents.BLAZE_BURN,
-                SoundEvents.WITHER_AMBIENT, SoundEvents.WITHER_HURT));
+                SoundEvents.BLAZE_AMBIENT, SoundEvents.BLAZE_BURN));
         CREATURE_SOUNDS.put(Language.DWARVEN, List.of(
-                SoundEvents.PIGLIN_AMBIENT, SoundEvents.PIGLIN_ANGRY));
+                SoundEvents.VINDICATOR_AMBIENT, SoundEvents.VINDICATOR_CELEBRATE,
+                SoundEvents.PILLAGER_AMBIENT, SoundEvents.PILLAGER_CELEBRATE));
         CREATURE_SOUNDS.put(Language.ELVEN, List.of(
-                SoundEvents.ENDERMAN_AMBIENT, SoundEvents.ENDERMAN_STARE));
+                SoundEvents.STRIDER_AMBIENT, SoundEvents.STRIDER_HAPPY, SoundEvents.STRIDER_STEP_LAVA));
         CREATURE_SOUNDS.put(Language.BEASTKIN, List.of(
                 SoundEvents.WOLF_GROWL, SoundEvents.WOLF_WHINE, SoundEvents.WOLF_HOWL));
         CREATURE_SOUNDS.put(Language.DRACONIC, List.of(
                 SoundEvents.ENDER_DRAGON_GROWL, SoundEvents.ENDER_DRAGON_AMBIENT));
         CREATURE_SOUNDS.put(Language.FEYBORN, List.of(
                 SoundEvents.ALLAY_AMBIENT_WITHOUT_ITEM, SoundEvents.ALLAY_ITEM_GIVEN));
+        CREATURE_SOUNDS.put(Language.HUMAN, List.of(
+                SoundEvents.VILLAGER_AMBIENT, SoundEvents.VILLAGER_YES, SoundEvents.VILLAGER_TRADE));
     }
 
     /** Ниже этого прогресса голос вообще не слышен — только звуки существ. */
@@ -120,6 +123,19 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
 
         String languageId = ClientLanguageState.speakerLanguageOf(speakerId);
         Language language = Language.byId(languageId).orElse(Language.COMMON);
+
+        if (language == Language.SIGN) {
+            // У языка жестов никогда нет голоса — глушим полностью и безусловно, вне
+            // зависимости от прогресса слушателя (в отличие от остальных языков, где на
+            // 100% эффект вообще не применяется).
+            short[] signAudio = entitySound.getRawAudio();
+            if (signAudio.length > 0) {
+                entitySound.setRawAudio(new short[signAudio.length]);
+            }
+            logDebug(debug, speakerId.toString(), shortId(speakerId) + " говорит на языке жестов — голос выключен полностью");
+            return;
+        }
+
         int myProgress = ClientLanguageState.progressOf(language.id());
 
         if (myProgress >= 100) {
