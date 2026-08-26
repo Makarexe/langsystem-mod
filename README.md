@@ -64,6 +64,14 @@ Voice Chat — опциональное дополнение.
 |---|---|
 | ![Книги-самоучители в рамках](docs/images/screenshot-tomes.png) | ![Таблички на разных языках](docs/images/screenshot-signs.png) |
 
+| Крафт книг-самоучителей | Прочитанная книга |
+|---|---|
+| ![Рецепты крафта](docs/images/screenshot-crafting.jpg) | ![Открытая языковая бумага](docs/images/screenshot-book-page.jpg) |
+
+| Самоучитель в руке | Выбор языка |
+|---|---|
+| ![Вид от первого лица](docs/images/screenshot-firstperson.jpg) | ![GUI выбора текущего языка](docs/images/screenshot-language-select.jpg) |
+
 ## Установка
 
 1. Убедитесь, что у вас **NeoForge 1.21.1** (клиент или сервер).
