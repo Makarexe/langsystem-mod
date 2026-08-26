@@ -34,10 +34,11 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * <p>Для языков из {@link #CREATURE_SOUNDS} вместо тонкого DSP-фильтра дополнительно
  * проигрывается настоящий ванильный звук существа рядом с говорящим (адорождённые —
- * блэйз, дворфийский — поборник/разбойник, эльфийский — нюхлер/фантом, зверолюдский — смесь
+ * блэйз, дворфийский — поборник/разбойник, эльфийский — ведьма, зверолюдский — смесь
  * из амбиента большинства обычных зверей, драконий — эндер-дракон, феерождённые —
- * аллай, людской — житель, Бездны — стражи/дельфины/спруты/утопленник, первородный —
- * звуки нотных блоков, древний — варден и эндермен), а сам голос почти
+ * аллай, людской — житель, Бездны — стражи/дельфины/спруты/утопленник, древний —
+ * звуки нотных блоков (с укороченным кулдауном — см. {@link #CREATURE_SOUND_COOLDOWN_OVERRIDES}),
+ * первородный — варден и эндермен), а сам голос почти
  * полностью приглушается — это гораздо заметнее на слух, чем один только фильтр. У
  * всеобщего своего "звучания" нет — там только приглушение голоса. Язык жестов — особый
  * случай: голоса у него не бывает в принципе, глушится полностью и безусловно.</p>
@@ -73,8 +74,8 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
                 SoundEvents.VINDICATOR_AMBIENT, SoundEvents.VINDICATOR_CELEBRATE,
                 SoundEvents.PILLAGER_AMBIENT, SoundEvents.PILLAGER_CELEBRATE));
         CREATURE_SOUNDS.put(Language.ELVEN, List.of(
-                SoundEvents.SNIFFER_IDLE, SoundEvents.SNIFFER_SNIFFING, SoundEvents.SNIFFER_SCENTING,
-                SoundEvents.PHANTOM_AMBIENT, SoundEvents.PHANTOM_SWOOP));
+                SoundEvents.WITCH_AMBIENT, SoundEvents.WITCH_CELEBRATE,
+                SoundEvents.WITCH_DRINK, SoundEvents.WITCH_THROW));
         CREATURE_SOUNDS.put(Language.BEASTKIN, List.of(
                 SoundEvents.WOLF_GROWL, SoundEvents.WOLF_HOWL, SoundEvents.COW_AMBIENT,
                 SoundEvents.PIG_AMBIENT, SoundEvents.SHEEP_AMBIENT, SoundEvents.CHICKEN_AMBIENT,
@@ -90,19 +91,36 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
                 SoundEvents.ALLAY_AMBIENT_WITHOUT_ITEM, SoundEvents.ALLAY_ITEM_GIVEN));
         CREATURE_SOUNDS.put(Language.HUMAN, List.of(
                 SoundEvents.VILLAGER_AMBIENT, SoundEvents.VILLAGER_YES, SoundEvents.VILLAGER_TRADE));
+        // Древний и Первородный поменялись местами относительно того, что было раньше:
+        // мелодия нотных блоков лучше подходит "древнему" как отголоски забытой музыки,
+        // а варден/эндермен — как раз тем самым "старым богам" из Первородного.
         CREATURE_SOUNDS.put(Language.ANCIENT, List.of(
-                SoundEvents.WARDEN_AMBIENT, SoundEvents.WARDEN_HEARTBEAT, SoundEvents.WARDEN_LISTENING,
-                SoundEvents.WARDEN_TENDRIL_CLICKS,
-                SoundEvents.ENDERMAN_AMBIENT, SoundEvents.ENDERMAN_STARE, SoundEvents.ENDERMAN_TELEPORT));
+                SoundEvents.NOTE_BLOCK_HARP.value(), SoundEvents.NOTE_BLOCK_BELL.value(),
+                SoundEvents.NOTE_BLOCK_CHIME.value(), SoundEvents.NOTE_BLOCK_XYLOPHONE.value()));
         CREATURE_SOUNDS.put(Language.ABYSS, List.of(
                 SoundEvents.GUARDIAN_AMBIENT, SoundEvents.GUARDIAN_ATTACK,
                 SoundEvents.ELDER_GUARDIAN_AMBIENT, SoundEvents.ELDER_GUARDIAN_CURSE,
                 SoundEvents.DOLPHIN_AMBIENT, SoundEvents.DOLPHIN_AMBIENT_WATER,
                 SoundEvents.SQUID_AMBIENT, SoundEvents.GLOW_SQUID_AMBIENT,
                 SoundEvents.DROWNED_AMBIENT_WATER));
+        // Без ENDERMAN_SCREAM ("рёв", слишком долгий) и ENDERMAN_TELEPORT — оба
+        // слишком выделяются/затягивают по сравнению с остальными короткими звуками.
         CREATURE_SOUNDS.put(Language.PRIMORDIAL, List.of(
-                SoundEvents.NOTE_BLOCK_HARP.value(), SoundEvents.NOTE_BLOCK_BELL.value(),
-                SoundEvents.NOTE_BLOCK_CHIME.value(), SoundEvents.NOTE_BLOCK_XYLOPHONE.value()));
+                SoundEvents.WARDEN_AMBIENT, SoundEvents.WARDEN_HEARTBEAT, SoundEvents.WARDEN_LISTENING,
+                SoundEvents.WARDEN_TENDRIL_CLICKS,
+                SoundEvents.ENDERMAN_AMBIENT, SoundEvents.ENDERMAN_STARE));
+    }
+
+    /**
+     * Индивидуальные кулдауны звука существа для отдельных языков — если не указан,
+     * используется {@link #CREATURE_SOUND_COOLDOWN_MS}. У Древнего (нотные блоки) звуки
+     * короткие и не мешают друг другу, поэтому кулдаун ощутимо меньше — иначе редкая
+     * "мелодия" звучит слишком разрежённо.
+     */
+    private static final Map<Language, Long> CREATURE_SOUND_COOLDOWN_OVERRIDES = new EnumMap<>(Language.class);
+
+    static {
+        CREATURE_SOUND_COOLDOWN_OVERRIDES.put(Language.ANCIENT, 200L);
     }
 
     /** Ниже этого прогресса голос вообще не слышен — только звуки существ. */
@@ -198,7 +216,7 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
             voiceVolume = 1f;
         }
 
-        boolean playCreatureSound = creatureIntensity > 0f && isCreatureSoundDue(speakerId)
+        boolean playCreatureSound = creatureIntensity > 0f && isCreatureSoundDue(speakerId, language)
                 && random.nextFloat() < creatureIntensity;
         entitySound.setRawAudio(muffle(audio, strength, voiceVolume));
 
@@ -245,10 +263,11 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
         return null;
     }
 
-    private boolean isCreatureSoundDue(UUID speakerId) {
+    private boolean isCreatureSoundDue(UUID speakerId, Language language) {
+        long cooldown = CREATURE_SOUND_COOLDOWN_OVERRIDES.getOrDefault(language, CREATURE_SOUND_COOLDOWN_MS);
         long now = System.currentTimeMillis();
         Long last = lastCreatureSoundAt.get(speakerId);
-        if (last != null && now - last < CREATURE_SOUND_COOLDOWN_MS) {
+        if (last != null && now - last < cooldown) {
             return false;
         }
         lastCreatureSoundAt.put(speakerId, now);
