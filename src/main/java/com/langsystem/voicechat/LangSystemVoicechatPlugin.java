@@ -37,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * блэйз, дворфийский — поборник/разбойник, эльфийский — нюхлер/фантом, зверолюдский — смесь
  * из амбиента большинства обычных зверей, драконий — эндер-дракон, феерождённые —
  * аллай, людской — житель, Бездны — стражи/дельфины/спруты/утопленник, первородный —
- * звуки нотных блоков), а сам голос почти
+ * звуки нотных блоков, древний — варден и эндермен), а сам голос почти
  * полностью приглушается — это гораздо заметнее на слух, чем один только фильтр. У
  * всеобщего своего "звучания" нет — там только приглушение голоса. Язык жестов — особый
  * случай: голоса у него не бывает в принципе, глушится полностью и безусловно.</p>
@@ -90,6 +90,10 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
                 SoundEvents.ALLAY_AMBIENT_WITHOUT_ITEM, SoundEvents.ALLAY_ITEM_GIVEN));
         CREATURE_SOUNDS.put(Language.HUMAN, List.of(
                 SoundEvents.VILLAGER_AMBIENT, SoundEvents.VILLAGER_YES, SoundEvents.VILLAGER_TRADE));
+        CREATURE_SOUNDS.put(Language.ANCIENT, List.of(
+                SoundEvents.WARDEN_AMBIENT, SoundEvents.WARDEN_HEARTBEAT, SoundEvents.WARDEN_LISTENING,
+                SoundEvents.WARDEN_TENDRIL_CLICKS,
+                SoundEvents.ENDERMAN_AMBIENT, SoundEvents.ENDERMAN_STARE, SoundEvents.ENDERMAN_TELEPORT));
         CREATURE_SOUNDS.put(Language.ABYSS, List.of(
                 SoundEvents.GUARDIAN_AMBIENT, SoundEvents.GUARDIAN_ATTACK,
                 SoundEvents.ELDER_GUARDIAN_AMBIENT, SoundEvents.ELDER_GUARDIAN_CURSE,

@@ -18,6 +18,7 @@ public enum Language {
     HELLBORN("hellborn", "Адорождённых", 0x992222, hebrewRange()),
     ABYSS("abyss", "Бездны", 0x4B0082, tifinaghRange()),
     PRIMORDIAL("primordial", "Первородный", 0xD4AF37, copticRange()),
+    ANCIENT("ancient", "Древний", 0x1E9C8B, georgianRange()),
     SIGN("sign", "Язык жестов", 0xCCCCCC, dingbatRange());
 
     private final String id;
@@ -93,6 +94,10 @@ public enum Language {
 
     private static String copticRange() {
         return buildRange(0x2C80, 0x2CB1); // коптское письмо для древних письмён старых богов
+    }
+
+    private static String georgianRange() {
+        return buildRange(0x10A0, 0x10C5); // асомтаврули — древнейшее грузинское письмо, для Древнего языка
     }
 
     private static String buildRange(int fromInclusive, int toInclusive) {
