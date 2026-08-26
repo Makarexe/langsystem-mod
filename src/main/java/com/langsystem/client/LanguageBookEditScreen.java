@@ -31,7 +31,7 @@ public final class LanguageBookEditScreen extends Screen {
     private static final int PAGE_TEXT_X_OFFSET = 36;
     private static final int PAGE_TEXT_Y_OFFSET = 30;
     private static final int LINES = 8;
-    private static final int LINE_HEIGHT = 16;
+    private static final int LINE_HEIGHT = 10;
     private static final int TEXT_COLOR = 0x000000;
 
     private final Consumer<String> onSave;
