@@ -36,7 +36,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * проигрывается настоящий ванильный звук существа рядом с говорящим (адорождённые —
  * блэйз, дворфийский — поборник/разбойник, эльфийский — нюхлер/фантом, зверолюдский — смесь
  * из амбиента большинства обычных зверей, драконий — эндер-дракон, феерождённые —
- * аллай, людской — житель, Бездны — варден, первородный — звуки нотных блоков), а сам голос почти
+ * аллай, людской — житель, Бездны — стражи/дельфины/спруты/утопленник, первородный —
+ * звуки нотных блоков), а сам голос почти
  * полностью приглушается — это гораздо заметнее на слух, чем один только фильтр. У
  * всеобщего своего "звучания" нет — там только приглушение голоса. Язык жестов — особый
  * случай: голоса у него не бывает в принципе, глушится полностью и безусловно.</p>
@@ -90,8 +91,11 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
         CREATURE_SOUNDS.put(Language.HUMAN, List.of(
                 SoundEvents.VILLAGER_AMBIENT, SoundEvents.VILLAGER_YES, SoundEvents.VILLAGER_TRADE));
         CREATURE_SOUNDS.put(Language.ABYSS, List.of(
-                SoundEvents.WARDEN_ROAR, SoundEvents.WARDEN_AMBIENT, SoundEvents.WARDEN_HEARTBEAT,
-                SoundEvents.WARDEN_ANGRY));
+                SoundEvents.GUARDIAN_AMBIENT, SoundEvents.GUARDIAN_ATTACK,
+                SoundEvents.ELDER_GUARDIAN_AMBIENT, SoundEvents.ELDER_GUARDIAN_CURSE,
+                SoundEvents.DOLPHIN_AMBIENT, SoundEvents.DOLPHIN_AMBIENT_WATER,
+                SoundEvents.SQUID_AMBIENT, SoundEvents.GLOW_SQUID_AMBIENT,
+                SoundEvents.DROWNED_AMBIENT_WATER));
         CREATURE_SOUNDS.put(Language.PRIMORDIAL, List.of(
                 SoundEvents.NOTE_BLOCK_HARP.value(), SoundEvents.NOTE_BLOCK_BELL.value(),
                 SoundEvents.NOTE_BLOCK_CHIME.value(), SoundEvents.NOTE_BLOCK_XYLOPHONE.value()));
