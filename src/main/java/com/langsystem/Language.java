@@ -16,6 +16,8 @@ public enum Language {
     DRACONIC("draconic", "Драконий", 0xDD3333, brailleRange()),
     FEYBORN("feyborn", "Феерождённых", 0x66DD99, oghamRange()),
     HELLBORN("hellborn", "Адорождённых", 0x992222, hebrewRange()),
+    ABYSS("abyss", "Бездны", 0x4B0082, tifinaghRange()),
+    PRIMORDIAL("primordial", "Первородный", 0xD4AF37, copticRange()),
     SIGN("sign", "Язык жестов", 0xCCCCCC, dingbatRange());
 
     private final String id;
@@ -83,6 +85,14 @@ public enum Language {
 
     private static String dingbatRange() {
         return buildRange(0x2701, 0x2720); // символы-пиктограммы для языка жестов
+    }
+
+    private static String tifinaghRange() {
+        return buildRange(0x2D30, 0x2D65); // тифинаг — угловатое "чужое" письмо для демонов Бездны
+    }
+
+    private static String copticRange() {
+        return buildRange(0x2C80, 0x2CB1); // коптское письмо для древних письмён старых богов
     }
 
     private static String buildRange(int fromInclusive, int toInclusive) {

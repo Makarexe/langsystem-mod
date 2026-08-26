@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * проигрывается настоящий ванильный звук существа рядом с говорящим (адорождённые —
  * блэйз, дворфийский — поборник/разбойник, эльфийский — нюхлер/фантом, зверолюдский — смесь
  * из амбиента большинства обычных зверей, драконий — эндер-дракон, феерождённые —
- * аллай, людской — житель), а сам голос почти
+ * аллай, людской — житель, Бездны — варден, первородный — звуки нотных блоков), а сам голос почти
  * полностью приглушается — это гораздо заметнее на слух, чем один только фильтр. У
  * всеобщего своего "звучания" нет — там только приглушение голоса. Язык жестов — особый
  * случай: голоса у него не бывает в принципе, глушится полностью и безусловно.</p>
@@ -89,6 +89,12 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
                 SoundEvents.ALLAY_AMBIENT_WITHOUT_ITEM, SoundEvents.ALLAY_ITEM_GIVEN));
         CREATURE_SOUNDS.put(Language.HUMAN, List.of(
                 SoundEvents.VILLAGER_AMBIENT, SoundEvents.VILLAGER_YES, SoundEvents.VILLAGER_TRADE));
+        CREATURE_SOUNDS.put(Language.ABYSS, List.of(
+                SoundEvents.WARDEN_ROAR, SoundEvents.WARDEN_AMBIENT, SoundEvents.WARDEN_HEARTBEAT,
+                SoundEvents.WARDEN_ANGRY));
+        CREATURE_SOUNDS.put(Language.PRIMORDIAL, List.of(
+                SoundEvents.NOTE_BLOCK_HARP.value(), SoundEvents.NOTE_BLOCK_BELL.value(),
+                SoundEvents.NOTE_BLOCK_CHIME.value(), SoundEvents.NOTE_BLOCK_XYLOPHONE.value()));
     }
 
     /** Ниже этого прогресса голос вообще не слышен — только звуки существ. */

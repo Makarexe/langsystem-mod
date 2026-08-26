@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    { "item": "minecraft:book" },
+    { "item": "minecraft:writable_book" },
+    { "item": "minecraft:echo_shard" }
+  ],
+  "result": {
+    "id": "langsystem:abyss_tome",
+    "count": 1
+  }
+}
