@@ -144,6 +144,11 @@ src/main/resources/
   assets/langsystem/textures/item/          — текстуры (общие + ленточка на язык)
 ```
 
+## Авторы
+
+- **Makarexe**
+- **medbratishka**
+
 ## Лицензия
 
 MIT — см. [LICENSE](LICENSE).
