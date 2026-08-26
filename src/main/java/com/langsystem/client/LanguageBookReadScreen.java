@@ -31,8 +31,8 @@ public final class LanguageBookReadScreen extends Screen {
     private final String bodyText;
     private List<FormattedCharSequence> lines = List.of();
 
-    public LanguageBookReadScreen(String languageTitle, String bodyText) {
-        super(Component.literal(languageTitle));
+    public LanguageBookReadScreen(Component languageTitle, String bodyText) {
+        super(languageTitle);
         this.bodyText = bodyText;
     }
 
@@ -48,7 +48,7 @@ public final class LanguageBookReadScreen extends Screen {
     protected void init() {
         lines = font.split(FormattedText.of(bodyText), TEXT_WIDTH);
         int buttonY = backgroundY() + IMAGE_HEIGHT + 2;
-        addRenderableWidget(Button.builder(Component.literal("Закрыть"), b -> onClose())
+        addRenderableWidget(Button.builder(Component.translatable("langsystem.gui.close"), b -> onClose())
                 .bounds(width / 2 - 100, buttonY, 200, 20).build());
     }
 

@@ -73,7 +73,7 @@ public final class LanguageSignEditScreen extends Screen {
     }
 
     public LanguageSignEditScreen(Consumer<String> onSave, @Nullable VanillaBackground background) {
-        super(Component.literal("Запись таблички"));
+        super(Component.translatable("langsystem.gui.sign_edit.title"));
         this.onSave = onSave;
         this.background = background;
         this.textColor = background != null ? textColorFor(background.woodType()) : 0xFFFFFF;

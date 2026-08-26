@@ -39,9 +39,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * модель таблички (столбик/доска) рисуется как обычно, не трогаем. Цвет и свечение
  * (крашение/светящиеся чернила) по-прежнему берутся из ванильного {@link SignText} —
  * работают как обычно.
- * Числа позиционирования (0.33333334F, 0.046666667F, 0.015625F * 0.6666667F) —
- * скопированы из {@code SignRenderer.TEXT_OFFSET}/{@code RENDER_SCALE}, чтобы текст
- * лёг ровно на то же место, где его рисовала бы ванильная табличка.
+ * Смещение и масштаб текста берутся не захардкоженными числами, а через
+ * {@code getTextOffset()}/{@code getSignTextRenderScale()} — у {@code HangingSignRenderer}
+ * (табличка на цепях) они переопределены под другую геометрию (другой offset, масштаб
+ * 0.9 вместо 0.6666667), и благодаря обычному виртуальному вызову эти методы сами
+ * возвращают правильные числа для конкретного подкласса рендерера — жёстко фиксированные
+ * значения обычной таблички ломали позицию текста на висячей.
  */
 @Mixin(SignRenderer.class)
 public abstract class SignRendererMixin {
@@ -49,6 +52,16 @@ public abstract class SignRendererMixin {
     @Shadow
     @Final
     private Font font;
+
+    // Табличка на цепях (HangingSignRenderer) переопределяет и смещение, и масштаб
+    // текста под свою геометрию (другой offset, scale 0.9 вместо 0.6666667) — вызывая
+    // эти методы вместо захардкоженных чисел обычной таблички, получаем правильную
+    // позицию текста для конкретного подкласса рендерера через обычный виртуальный вызов.
+    @Shadow
+    abstract Vec3 getTextOffset();
+
+    @Shadow
+    public abstract float getSignTextRenderScale();
 
     @Inject(method = "renderSignText", at = @At("HEAD"), cancellable = true)
     private void langsystem$renderSignText(BlockPos pos, SignText text, PoseStack poseStack, MultiBufferSource buffer,
@@ -95,8 +108,9 @@ public abstract class SignRendererMixin {
         if (!isFrontText) {
             poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
         }
-        float scale = 0.015625F * 0.6666667F;
-        poseStack.translate(0.0F, 0.33333334F, 0.046666667F);
+        Vec3 offset = getTextOffset();
+        float scale = 0.015625F * getSignTextRenderScale();
+        poseStack.translate(offset.x, offset.y, offset.z);
         poseStack.scale(scale, -scale, scale);
 
         int half = 4 * lineHeight / 2;

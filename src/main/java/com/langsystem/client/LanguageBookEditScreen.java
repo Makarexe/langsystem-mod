@@ -41,7 +41,7 @@ public final class LanguageBookEditScreen extends Screen {
     private TextFieldHelper field;
 
     public LanguageBookEditScreen(Consumer<String> onSave) {
-        super(Component.literal("Письмо на текущем языке"));
+        super(Component.translatable("langsystem.gui.book_edit.title"));
         this.onSave = onSave;
         Arrays.fill(messages, "");
     }
@@ -65,9 +65,9 @@ public final class LanguageBookEditScreen extends Screen {
         );
 
         int buttonY = backgroundY() + IMAGE_HEIGHT + 2;
-        addRenderableWidget(Button.builder(Component.literal("Записать"), b -> save())
+        addRenderableWidget(Button.builder(Component.translatable("langsystem.gui.book_edit.save"), b -> save())
                 .bounds(width / 2 - 100, buttonY, 98, 20).build());
-        addRenderableWidget(Button.builder(Component.literal("Отмена"), b -> onClose())
+        addRenderableWidget(Button.builder(Component.translatable("langsystem.gui.book_edit.cancel"), b -> onClose())
                 .bounds(width / 2 + 2, buttonY, 98, 20).build());
     }
 

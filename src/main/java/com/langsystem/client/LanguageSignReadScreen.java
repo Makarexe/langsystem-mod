@@ -33,13 +33,13 @@ public final class LanguageSignReadScreen extends Screen {
     @Nullable
     private SignRenderer.SignModel signModel;
 
-    public LanguageSignReadScreen(String languageTitle, String bodyText) {
+    public LanguageSignReadScreen(Component languageTitle, String bodyText) {
         this(languageTitle, bodyText, null);
     }
 
-    public LanguageSignReadScreen(String languageTitle, String bodyText,
+    public LanguageSignReadScreen(Component languageTitle, String bodyText,
                                    @Nullable LanguageSignEditScreen.VanillaBackground background) {
-        super(Component.literal(languageTitle));
+        super(languageTitle);
         this.background = background;
         this.textColor = background != null ? LanguageSignEditScreen.textColorFor(background.woodType()) : 0xFFFFFF;
         String[] split = bodyText.split("\n", -1);
@@ -51,7 +51,7 @@ public final class LanguageSignReadScreen extends Screen {
 
     @Override
     protected void init() {
-        addRenderableWidget(Button.builder(Component.literal("Закрыть"), b -> onClose())
+        addRenderableWidget(Button.builder(Component.translatable("langsystem.gui.close"), b -> onClose())
                 .bounds(width / 2 - 100, (int) (signCenterY() + 90), 200, 20).build());
         if (background != null) {
             signModel = SignRenderer.createSignModel(minecraft.getEntityModels(), background.woodType());

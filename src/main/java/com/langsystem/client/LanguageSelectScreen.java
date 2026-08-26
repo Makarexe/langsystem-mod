@@ -22,7 +22,7 @@ public final class LanguageSelectScreen extends Screen {
     private static final int SPACING = 4;
 
     public LanguageSelectScreen() {
-        super(Component.literal("Выбор языка"));
+        super(Component.translatable("langsystem.gui.language_select.title"));
     }
 
     @Override
@@ -40,7 +40,7 @@ public final class LanguageSelectScreen extends Screen {
         int y = startY;
         if (entries.isEmpty()) {
             addRenderableWidget(new StringWidget(x, y, BUTTON_WIDTH, 16,
-                    Component.literal("Вы пока не знаете ни одного языка"), font).alignCenter());
+                    Component.translatable("langsystem.gui.language_select.none_known"), font).alignCenter());
             y += BUTTON_HEIGHT + SPACING;
         }
 
@@ -50,10 +50,12 @@ public final class LanguageSelectScreen extends Screen {
                 continue;
             }
             boolean isCurrent = entry.languageId().equals(current);
-            String fluency = SpeechFluency.shortLabel(entry.progress());
-            String label = language.displayName() + "  (" + entry.progress() + "%, " + fluency + ")"
-                    + (isCurrent ? "  <- текущий" : "");
-            Button button = Button.builder(Component.literal(label), b -> {
+            Component entryLabel = Component.translatable("langsystem.gui.language_select.entry",
+                    language.translatable(), entry.progress(), SpeechFluency.translatableLabel(entry.progress()));
+            Component label = isCurrent
+                    ? Component.translatable("langsystem.gui.language_select.current_suffix", entryLabel)
+                    : entryLabel;
+            Button button = Button.builder(label, b -> {
                         PacketDistributor.sendToServer(new SetLanguagePayload(language.id()));
                         onClose();
                     })
@@ -64,7 +66,7 @@ public final class LanguageSelectScreen extends Screen {
             y += BUTTON_HEIGHT + SPACING;
         }
 
-        addRenderableWidget(Button.builder(Component.literal("Закрыть"), b -> onClose())
+        addRenderableWidget(Button.builder(Component.translatable("langsystem.gui.close"), b -> onClose())
                 .bounds(x, y + 6, BUTTON_WIDTH, BUTTON_HEIGHT)
                 .build());
     }

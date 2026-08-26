@@ -57,6 +57,6 @@ public abstract class LocalPlayerMixin {
         Language language = Language.byId(content.languageId()).orElse(Language.COMMON);
         int myProgress = ClientLanguageState.progressOf(language.id());
         String shown = RuneCipher.read(content.rawText(), language, content.writerProgress(), myProgress);
-        Minecraft.getInstance().setScreen(new LanguageSignReadScreen(language.displayName(), shown, background));
+        Minecraft.getInstance().setScreen(new LanguageSignReadScreen(language.translatable(), shown, background));
     }
 }

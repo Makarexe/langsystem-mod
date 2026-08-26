@@ -39,7 +39,7 @@ public final class ClientBookScreens {
         Language language = Language.byId(content.languageId()).orElse(Language.COMMON);
         int myProgress = ClientLanguageState.progressOf(language.id());
         String shown = RuneCipher.read(content.rawText(), language, content.writerProgress(), myProgress);
-        Minecraft.getInstance().setScreen(new LanguageBookReadScreen(language.displayName(), shown));
+        Minecraft.getInstance().setScreen(new LanguageBookReadScreen(language.translatable(), shown));
     }
 
     private ClientBookScreens() {

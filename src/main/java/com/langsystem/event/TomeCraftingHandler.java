@@ -39,10 +39,8 @@ public final class TomeCraftingHandler {
         }
 
         crafted.setCount(0);
-        serverPlayer.sendSystemMessage(Component.literal(
-                "[Языки] Самоучитель по языку " + tome.language().displayName() + " рассыпался — "
-                        + "чтобы его составить, нужно уже знать язык минимум на " + REQUIRED_PROGRESS
-                        + "%. Материалы потрачены впустую.")
+        serverPlayer.sendSystemMessage(Component.translatable("langsystem.msg.tome_crumbles",
+                        tome.language().translatable(), REQUIRED_PROGRESS)
                 .withStyle(style -> style.withColor(0xFF5555)));
     }
 

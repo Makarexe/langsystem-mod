@@ -1,5 +1,8 @@
 package com.langsystem;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -8,37 +11,31 @@ import java.util.Optional;
  * со старта на 100%. Остальные нужно изучать (выдаются командой с уровнем прогресса).
  */
 public enum Language {
-    COMMON("common", "Всеобщий", 0xFFFFFF, "abcdefghijklmnopqrstuvwxyz"),
-    HUMAN("human", "Людской", 0x55FF55, cyrillicRange()),
-    DWARVEN("dwarven", "Дворфийский", 0xB08040, runicRange()),
-    ELVEN("elven", "Эльфийский", 0x66CCFF, glagoliticRange()),
-    BEASTKIN("beastkin", "Зверолюдский", 0xCC8844, cherokeeRange()),
-    DRACONIC("draconic", "Драконий", 0xDD3333, brailleRange()),
-    FEYBORN("feyborn", "Феерождённых", 0x66DD99, oghamRange()),
-    HELLBORN("hellborn", "Адорождённых", 0x992222, hebrewRange()),
-    ABYSS("abyss", "Бездны", 0x4B0082, tifinaghRange()),
-    PRIMORDIAL("primordial", "Первородный", 0xD4AF37, copticRange()),
-    ANCIENT("ancient", "Древний", 0x1E9C8B, georgianRange()),
-    SIGN("sign", "Язык жестов", 0xCCCCCC, dingbatRange());
+    COMMON("common", 0xFFFFFF, "abcdefghijklmnopqrstuvwxyz"), // Всеобщий
+    HUMAN("human", 0x55FF55, cyrillicRange()), // Людской
+    DWARVEN("dwarven", 0xB08040, runicRange()), // Дворфийский
+    ELVEN("elven", 0x66CCFF, glagoliticRange()), // Эльфийский
+    BEASTKIN("beastkin", 0xCC8844, cherokeeRange()), // Зверолюдский
+    DRACONIC("draconic", 0xDD3333, brailleRange()), // Драконий
+    FEYBORN("feyborn", 0x66DD99, oghamRange()), // Феерождённых
+    HELLBORN("hellborn", 0x992222, hebrewRange()), // Адорождённых
+    ABYSS("abyss", 0x4B0082, tifinaghRange()), // Бездны
+    PRIMORDIAL("primordial", 0xD4AF37, copticRange()), // Первородный
+    ANCIENT("ancient", 0x1E9C8B, georgianRange()), // Древний
+    SIGN("sign", 0xCCCCCC, dingbatRange()); // Язык жестов
 
     private final String id;
-    private final String displayName;
     private final int color;
     private final String glyphAlphabet;
 
-    Language(String id, String displayName, int color, String glyphAlphabet) {
+    Language(String id, int color, String glyphAlphabet) {
         this.id = id;
-        this.displayName = displayName;
         this.color = color;
         this.glyphAlphabet = glyphAlphabet;
     }
 
     public String id() {
         return id;
-    }
-
-    public String displayName() {
-        return displayName;
     }
 
     public int color() {
@@ -48,6 +45,15 @@ public enum Language {
     /** Набор символов, которым язык "маскирует" непонятную речь. */
     public String glyphAlphabet() {
         return glyphAlphabet;
+    }
+
+    /**
+     * Локализуемое название языка — единственный источник имени языка теперь лежит в
+     * lang-файлах (ключ {@code langsystem.language.<id>}), а не захардкожен в перечислении:
+     * такой Component переводится на стороне КАЖДОГО клиента отдельно по его языку игры.
+     */
+    public MutableComponent translatable() {
+        return Component.translatable("langsystem.language." + id);
     }
 
     public static Optional<Language> byId(String id) {

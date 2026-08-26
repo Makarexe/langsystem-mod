@@ -1,5 +1,8 @@
 package com.langsystem.util;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+
 /**
  * Пороги владения языком, которые определяют, может ли игрок вообще ГОВОРИТЬ на
  * нём (в отличие от {@link com.langsystem.data.LanguageData#progress}, который
@@ -38,17 +41,21 @@ public final class SpeechFluency {
         return progress >= FLUENT_AT;
     }
 
-    /** Короткая подпись состояния — используется в GUI выбора языка. */
-    public static String shortLabel(int progress) {
+    /**
+     * Короткая подпись состояния — используется в GUI выбора языка. См.
+     * {@link com.langsystem.Language#translatable()} — переводится по языку игры
+     * каждого клиента отдельно, а не захардкожена по-русски.
+     */
+    public static MutableComponent translatableLabel(int progress) {
         if (progress >= 100) {
-            return "свободно";
+            return Component.translatable("langsystem.fluency.free");
         }
         if (isFluent(progress)) {
-            return "бегло";
+            return Component.translatable("langsystem.fluency.fluent");
         }
         if (canSpeak(progress)) {
-            return "ломано";
+            return Component.translatable("langsystem.fluency.broken");
         }
-        return "не может говорить";
+        return Component.translatable("langsystem.fluency.cannot_speak");
     }
 }

@@ -1,5 +1,8 @@
 package com.langsystem;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
@@ -23,7 +26,7 @@ import java.util.Random;
  */
 public enum SpeechDefect {
 
-    RHOTACISM("rhotacism", "Картавость", 0.85) {
+    RHOTACISM("rhotacism", 0.85) { // Картавость
         @Override
         protected String transform(char c, Random random) {
             return switch (c) {
@@ -34,7 +37,7 @@ public enum SpeechDefect {
         }
     },
 
-    SIGMATISM("sigmatism", "Сигматизм", 0.7) {
+    SIGMATISM("sigmatism", 0.7) { // Сигматизм
         @Override
         protected String transform(char c, Random random) {
             if (c != 'с' && c != 'С') {
@@ -47,12 +50,10 @@ public enum SpeechDefect {
     };
 
     private final String id;
-    private final String displayName;
     private final double chance;
 
-    SpeechDefect(String id, String displayName, double chance) {
+    SpeechDefect(String id, double chance) {
         this.id = id;
-        this.displayName = displayName;
         this.chance = chance;
     }
 
@@ -60,8 +61,9 @@ public enum SpeechDefect {
         return id;
     }
 
-    public String displayName() {
-        return displayName;
+    /** См. {@link Language#translatable()} — переводится по языку игры каждого клиента отдельно. */
+    public MutableComponent translatable() {
+        return Component.translatable("langsystem.defect." + id);
     }
 
     /** Как исказить конкретную подходящую букву; {@code null} — буква не подходит под условие дефекта. */

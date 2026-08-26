@@ -46,8 +46,8 @@ public final class ClientEvents {
                     .executes(ctx -> {
                         boolean enabled = !VoiceDebugState.isEnabled();
                         VoiceDebugState.setEnabled(enabled);
-                        ctx.getSource().sendSystemMessage(Component.literal(
-                                "[LangSystem] Отладка голоса: " + (enabled ? "включена" : "выключена")));
+                        ctx.getSource().sendSystemMessage(Component.translatable("langsystem.voice.debug.toggle",
+                                Component.translatable(enabled ? "langsystem.voice.debug.on" : "langsystem.voice.debug.off")));
                         return 1;
                     }));
         }

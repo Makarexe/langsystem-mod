@@ -76,7 +76,7 @@ public final class NetworkHandler {
             }
             serverPlayer.setData(ModAttachments.LANGUAGE_DATA, data);
             serverPlayer.displayClientMessage(
-                    Component.literal("Текущий язык: " + opt.get().displayName())
+                    Component.translatable("langsystem.msg.current_language", opt.get().translatable())
                             .withStyle(style -> style.withColor(opt.get().color())),
                     true
             );
@@ -103,10 +103,8 @@ public final class NetworkHandler {
             Language language = data.current();
             int progress = data.progress(language);
             if (progress < SpeechFluency.CANNOT_SPEAK_BELOW) {
-                serverPlayer.displayClientMessage(Component.literal(
-                                "[Языки] Вы знаете \"" + language.displayName()
-                                        + "\" слишком слабо, чтобы связно записать текст на нём (нужно минимум "
-                                        + SpeechFluency.CANNOT_SPEAK_BELOW + "%).")
+                serverPlayer.displayClientMessage(Component.translatable("langsystem.msg.cannot_write",
+                                language.translatable(), SpeechFluency.CANNOT_SPEAK_BELOW)
                                 .withStyle(style -> style.withColor(0xFF5555)),
                         true);
                 return;
@@ -115,14 +113,14 @@ public final class NetworkHandler {
             stack.set(ModDataComponents.LANGUAGE_BOOK_TEXT.get(),
                     new ModDataComponents.LanguageText(language.id(), payload.text(), progress));
             stack.set(DataComponents.LORE, new ItemLore(List.of(
-                    Component.literal(language.displayName()).withStyle(style -> style.withColor(language.color())))));
+                    language.translatable().withStyle(style -> style.withColor(language.color())))));
             // ITEM_NAME, а не CUSTOM_NAME — у последнего ItemStack.getTooltipLines()
             // безусловно добавляет курсив, как только компонент вообще присутствует
             // (проверено по декомпилированным исходникам), и убрать его стилем самого
             // компонента нельзя — стиль переопределяется уже после. ITEM_NAME меняет
             // отображаемое имя точно так же, но под эту принудительную стилизацию не
             // подпадает.
-            stack.set(DataComponents.ITEM_NAME, Component.literal("Исписанная бумага"));
+            stack.set(DataComponents.ITEM_NAME, Component.translatable("langsystem.item.written_paper"));
             // Переключает модель предмета на language_book_written через overrides в
             // language_book.json (custom_model_data == 1) — та же "бумага", но с парой
             // тёмных пикселей, похожих на текст, вместо чистого листа.
@@ -150,10 +148,8 @@ public final class NetworkHandler {
             Language language = data.current();
             int progress = data.progress(language);
             if (progress < SpeechFluency.CANNOT_SPEAK_BELOW) {
-                serverPlayer.displayClientMessage(Component.literal(
-                                "[Языки] Вы знаете \"" + language.displayName()
-                                        + "\" слишком слабо, чтобы связно записать текст на нём (нужно минимум "
-                                        + SpeechFluency.CANNOT_SPEAK_BELOW + "%).")
+                serverPlayer.displayClientMessage(Component.translatable("langsystem.msg.cannot_write",
+                                language.translatable(), SpeechFluency.CANNOT_SPEAK_BELOW)
                                 .withStyle(style -> style.withColor(0xFF5555)),
                         true);
                 return;

@@ -173,15 +173,15 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
             if (signAudio.length > 0) {
                 entitySound.setRawAudio(new short[signAudio.length]);
             }
-            logDebug(debug, speakerId.toString(), shortId(speakerId) + " говорит на языке жестов — голос выключен полностью");
+            logDebug(debug, speakerId.toString(), Component.translatable("langsystem.voice.debug.sign", shortId(speakerId)));
             return;
         }
 
         int myProgress = ClientLanguageState.progressOf(language.id());
 
         if (myProgress >= 100) {
-            logDebug(debug, speakerId.toString(), shortId(speakerId) + " говорит на \"" + language.displayName()
-                    + "\", у вас там 100% — эффект не нужен, голос идёт как есть");
+            logDebug(debug, speakerId.toString(), Component.translatable("langsystem.voice.debug.fluent",
+                    shortId(speakerId), language.translatable()));
             return; // язык знаком свободно — без изменений
         }
 
@@ -241,10 +241,10 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
             }
             if (shouldLog) {
                 String name = speaker != null ? speaker.getGameProfile().getName() : shortId(speakerId);
-                String message = "[LangSystem/voice] " + name + " -> \"" + language.displayName()
-                        + "\", ваш прогресс " + myProgress + "%, сила эффекта " + Math.round(strength * 100) + "%"
-                        + (chosenSound != null ? " — играю звук существа" : " — приглушаю голос");
-                listener.displayClientMessage(Component.literal(message), false);
+                String key = chosenSound != null ? "langsystem.voice.debug.creature_sound" : "langsystem.voice.debug.muffled";
+                Component message = Component.translatable(key, name, language.translatable(),
+                        myProgress, Math.round(strength * 100));
+                listener.displayClientMessage(message, false);
             }
         });
     }
@@ -284,14 +284,14 @@ public final class LangSystemVoicechatPlugin implements VoicechatPlugin {
         return true;
     }
 
-    private void logDebug(boolean enabled, String throttleKey, String message) {
+    private void logDebug(boolean enabled, String throttleKey, Component message) {
         if (!enabled || !isDue(throttleKey)) {
             return;
         }
         Minecraft.getInstance().execute(() -> {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player != null) {
-                player.displayClientMessage(Component.literal("[LangSystem/voice] " + message), false);
+                player.displayClientMessage(message, false);
             }
         });
     }

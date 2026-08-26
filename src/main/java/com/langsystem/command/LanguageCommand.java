@@ -14,9 +14,11 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Arrays;
+import java.util.Map;
 
 public final class LanguageCommand {
 
@@ -67,7 +69,7 @@ public final class LanguageCommand {
         String languageId = StringArgumentType.getString(context, "language");
         var opt = Language.byId(languageId);
         if (opt.isEmpty()) {
-            context.getSource().sendFailure(Component.literal("Неизвестный язык: " + languageId));
+            context.getSource().sendFailure(Component.translatable("langsystem.command.unknown_language", languageId));
             return 0;
         }
         Language language = opt.get();
@@ -77,21 +79,20 @@ public final class LanguageCommand {
         NetworkHandler.sendSync(target);
 
         if (!changed) {
-            context.getSource().sendFailure(Component.literal(
-                    percent <= 0 ? "Этот язык нельзя забрать или игрок и так его не знает."
-                            : "У игрока уже такой уровень владения этим языком."));
+            context.getSource().sendFailure(Component.translatable(
+                    percent <= 0 ? "langsystem.command.take.no_change" : "langsystem.command.give.no_change"));
             return 0;
         }
 
         if (percent <= 0) {
-            context.getSource().sendSuccess(() -> Component.literal(
-                    target.getGameProfile().getName() + " больше не знает язык: " + language.displayName()), true);
-            target.sendSystemMessage(Component.literal("Вы забыли язык: " + language.displayName())
+            context.getSource().sendSuccess(() -> Component.translatable("langsystem.command.take.success",
+                    target.getGameProfile().getName(), language.translatable()), true);
+            target.sendSystemMessage(Component.translatable("langsystem.command.take.notify", language.translatable())
                     .withStyle(style -> style.withColor(language.color())));
         } else {
-            context.getSource().sendSuccess(() -> Component.literal(
-                    target.getGameProfile().getName() + " теперь знает язык " + language.displayName() + " на " + percent + "%"), true);
-            target.sendSystemMessage(Component.literal("Ваш уровень владения языком " + language.displayName() + ": " + percent + "%")
+            context.getSource().sendSuccess(() -> Component.translatable("langsystem.command.give.success",
+                    target.getGameProfile().getName(), language.translatable(), percent), true);
+            target.sendSystemMessage(Component.translatable("langsystem.command.give.notify", language.translatable(), percent)
                     .withStyle(style -> style.withColor(language.color())));
         }
         return 1;
@@ -100,11 +101,23 @@ public final class LanguageCommand {
     private static int list(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerPlayer target = EntityArgument.getPlayer(context, "player");
         LanguageData data = target.getData(ModAttachments.LANGUAGE_DATA);
-        String known = data.allProgress().entrySet().stream()
-                .map(e -> e.getKey().displayName() + " (" + e.getValue() + "%)")
-                .reduce((a, b) -> a + ", " + b).orElse("-");
-        context.getSource().sendSuccess(() -> Component.literal(
-                target.getGameProfile().getName() + " знает: " + known + ". Сейчас говорит на: " + data.current().displayName()), false);
+
+        MutableComponent known = Component.empty();
+        boolean any = false;
+        for (Map.Entry<Language, Integer> entry : data.allProgress().entrySet()) {
+            if (any) {
+                known.append(", ");
+            }
+            known.append(Component.translatable("langsystem.command.list.entry", entry.getKey().translatable(), entry.getValue()));
+            any = true;
+        }
+        if (!any) {
+            known = Component.translatable("langsystem.command.list.none");
+        }
+
+        MutableComponent knownFinal = known;
+        context.getSource().sendSuccess(() -> Component.translatable("langsystem.command.list.success",
+                target.getGameProfile().getName(), knownFinal, data.current().translatable()), false);
         return 1;
     }
 
@@ -119,7 +132,7 @@ public final class LanguageCommand {
         String defectId = StringArgumentType.getString(context, "defect");
         var opt = SpeechDefect.byId(defectId);
         if (opt.isEmpty()) {
-            context.getSource().sendFailure(Component.literal("Неизвестный дефект речи: " + defectId));
+            context.getSource().sendFailure(Component.translatable("langsystem.command.unknown_defect", defectId));
             return 0;
         }
         SpeechDefect defect = opt.get();
@@ -128,19 +141,19 @@ public final class LanguageCommand {
         target.setData(ModAttachments.LANGUAGE_DATA, data);
 
         if (!changed) {
-            context.getSource().sendFailure(Component.literal(
-                    give ? "У игрока уже есть этот дефект речи." : "У игрока и так нет такого дефекта речи."));
+            context.getSource().sendFailure(Component.translatable(
+                    give ? "langsystem.command.defect.give.no_change" : "langsystem.command.defect.take.no_change"));
             return 0;
         }
 
         if (give) {
-            context.getSource().sendSuccess(() -> Component.literal(
-                    target.getGameProfile().getName() + " теперь говорит с дефектом: " + defect.displayName()), true);
-            target.sendSystemMessage(Component.literal("Вам выдан дефект речи: " + defect.displayName()));
+            context.getSource().sendSuccess(() -> Component.translatable("langsystem.command.defect.give.success",
+                    target.getGameProfile().getName(), defect.translatable()), true);
+            target.sendSystemMessage(Component.translatable("langsystem.command.defect.give.notify", defect.translatable()));
         } else {
-            context.getSource().sendSuccess(() -> Component.literal(
-                    target.getGameProfile().getName() + " больше не имеет дефекта: " + defect.displayName()), true);
-            target.sendSystemMessage(Component.literal("У вас забрали дефект речи: " + defect.displayName()));
+            context.getSource().sendSuccess(() -> Component.translatable("langsystem.command.defect.take.success",
+                    target.getGameProfile().getName(), defect.translatable()), true);
+            target.sendSystemMessage(Component.translatable("langsystem.command.defect.take.notify", defect.translatable()));
         }
         return 1;
     }
@@ -148,10 +161,25 @@ public final class LanguageCommand {
     private static int listDefects(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         ServerPlayer target = EntityArgument.getPlayer(context, "player");
         LanguageData data = target.getData(ModAttachments.LANGUAGE_DATA);
-        String known = data.defects().stream().map(SpeechDefect::displayName)
-                .reduce((a, b) -> a + ", " + b).orElse("нет");
-        context.getSource().sendSuccess(() -> Component.literal(
-                target.getGameProfile().getName() + " — дефекты речи: " + known), false);
+
+        MutableComponent known;
+        if (data.defects().isEmpty()) {
+            known = Component.translatable("langsystem.command.defect.list.none");
+        } else {
+            known = Component.empty();
+            boolean first = true;
+            for (SpeechDefect defect : data.defects()) {
+                if (!first) {
+                    known.append(", ");
+                }
+                known.append(defect.translatable());
+                first = false;
+            }
+        }
+
+        MutableComponent knownFinal = known;
+        context.getSource().sendSuccess(() -> Component.translatable("langsystem.command.defect.list.success",
+                target.getGameProfile().getName(), knownFinal), false);
         return 1;
     }
 

@@ -41,15 +41,14 @@ public final class LanguageTomeItem extends Item {
 
         LanguageData data = player.getData(ModAttachments.LANGUAGE_DATA);
         if (data.progress(language) >= 100) {
-            player.displayClientMessage(Component.literal(
-                    "Вы уже свободно владеете языком: " + language.displayName()), true);
+            player.displayClientMessage(Component.translatable("langsystem.msg.tome_already_fluent",
+                    language.translatable()), true);
             return InteractionResultHolder.pass(stack);
         }
 
         long gameTime = level.getGameTime();
         if (!data.canStudy(language, gameTime, STUDY_COOLDOWN_TICKS)) {
-            player.displayClientMessage(Component.literal(
-                    "Вы недавно уже занимались по этой книге, нужно немного отдохнуть."), true);
+            player.displayClientMessage(Component.translatable("langsystem.msg.tome_cooldown"), true);
             return InteractionResultHolder.pass(stack);
         }
 
@@ -60,8 +59,8 @@ public final class LanguageTomeItem extends Item {
             NetworkHandler.sendSync(serverPlayer);
         }
 
-        player.sendSystemMessage(Component.literal(
-                "[Языки] Вы позанимались языком " + language.displayName() + ": +1% (сейчас " + newProgress + "%)")
+        player.sendSystemMessage(Component.translatable("langsystem.msg.tome_study_gain",
+                        language.translatable(), newProgress)
                 .withStyle(style -> style.withColor(language.color())));
 
         return InteractionResultHolder.consume(stack);

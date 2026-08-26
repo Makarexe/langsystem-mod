@@ -41,10 +41,8 @@ public final class ChatLanguageHandler {
         if (!SpeechFluency.canSpeak(senderProgress)) {
             // Знания слишком мало, чтобы связно сказать хоть что-то на этом языке —
             // сообщение вообще никуда не уходит, автору лишь объясняем, в чём дело.
-            sender.sendSystemMessage(Component.literal(
-                    "[Языки] Вы пока знаете \"" + spoken.displayName() + "\" слишком слабо ("
-                            + senderProgress + "%), чтобы на нём связно говорить (нужно минимум "
-                            + SpeechFluency.CANNOT_SPEAK_BELOW + "%). Выберите другой язык или продолжайте изучать этот.")
+            sender.sendSystemMessage(Component.translatable("langsystem.msg.cannot_speak",
+                            spoken.translatable(), senderProgress, SpeechFluency.CANNOT_SPEAK_BELOW)
                     .withStyle(style -> style.withColor(0xFF5555)));
             return;
         }
@@ -68,24 +66,26 @@ public final class ChatLanguageHandler {
             boolean revealsLanguageName = recipient == sender || understanding >= SpeechFluency.CANNOT_SPEAK_BELOW;
             Component senderNameTag = Component.literal("<")
                     .append(sender.getDisplayName().copy())
-                    .append(revealsLanguageName ? Component.literal(" [" + spoken.displayName() + "]") : Component.empty())
+                    .append(revealsLanguageName
+                            ? Component.literal(" [").append(spoken.translatable()).append("]")
+                            : Component.empty())
                     .append(Component.literal("> "));
 
-            String bodyText;
+            MutableComponent bodyComponent;
 
             if (spoken == Language.SIGN && recipient != sender && !Visibility.canSee(recipient, sender, SIGN_VISIBILITY_RANGE)) {
                 // Язык жестов чисто визуальный — если получатель не видит говорящего
                 // (закрыт стеной, отвернулся, слишком далеко), понять его невозможно
                 // вообще, независимо от уровня владения языком.
-                bodyText = "* показывает жестами, но вы не видите говорящего *";
+                bodyComponent = Component.translatable("langsystem.msg.sign_language_no_sight");
             } else {
-                bodyText = RuneCipher.read(spokenMessage, spoken, senderProgress, understanding);
+                bodyComponent = Component.literal(RuneCipher.read(spokenMessage, spoken, senderProgress, understanding));
             }
 
             // Текст всегда белый, без цвета конкретного языка.
             MutableComponent line = Component.empty()
                     .append(senderNameTag)
-                    .append(Component.literal(bodyText).withStyle(style -> style.withColor(0xFFFFFF)));
+                    .append(bodyComponent.withStyle(style -> style.withColor(0xFFFFFF)));
 
             recipient.sendSystemMessage(line);
         }

@@ -81,8 +81,8 @@ public final class PassiveLearningHandler {
                     int newProgress = learnerData.addProgress(language, 1);
                     learner.setData(ModAttachments.LANGUAGE_DATA, learnerData);
                     NetworkHandler.sendSync(learner);
-                    learner.sendSystemMessage(Component.literal(
-                            "[Языки] Вы начинаете лучше понимать язык " + language.displayName() + ": +1% (сейчас " + newProgress + "%)")
+                    learner.sendSystemMessage(Component.translatable("langsystem.msg.progress_gain",
+                                    language.translatable(), newProgress)
                             .withStyle(style -> style.withColor(language.color())));
                 }
             }
